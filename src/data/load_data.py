@@ -3,6 +3,9 @@ from fastf1.core import Session
 from fastf1.events import Event
 import pandas as pd
 
+fastf1.Cache.enable_cache("data/raw") # store data locally for performance
+
+
 def get_event_metadata(event_name: str, year: int = 2021) -> Event:
     """
     Docstring for get_event_metadata
