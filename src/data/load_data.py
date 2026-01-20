@@ -34,7 +34,12 @@ def get_session(year: int = 2021, race_id: int = 1, type: str = 'R' ) -> Session
     :param type: Q-> Qualifiying, R-> Race, etc. 
     :type type: str
     """
-    session = fastf1.get_session(year, race_id, type)
+    try: 
+        session = fastf1.get_session(year, race_id, type)
+    except Exception as e: 
+        raise ValueError(
+            f"Failed to load session: year = {year}, race_id = {race_id}, type = {type}"
+            ) from e
     return session
 
 def load_laps_from_session(session: pd.DataFrame):
