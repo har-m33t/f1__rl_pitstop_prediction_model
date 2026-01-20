@@ -17,7 +17,10 @@ def get_event_metadata(event_name: str, year: int = 2021) -> Event:
 
     Load event data for a given race track and year using the FastF1 API. 
     """
-    event = fastf1.get_event(year, event_name)
+    try:
+        event = fastf1.get_event(year, event_name)
+    except Exception as e: 
+        raise ValueError(f"Invalid Event: {event_name} ({year})") from e
     return event
 
 def get_session(year: int = 2021, race_id: int = 1, type: str = 'R' ) -> Session:
