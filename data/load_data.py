@@ -18,5 +18,8 @@ def load_event(event_name: str, year: int = 2021) -> pd.DataFrame:
     event = fastf1.get_event(year, event_name)
     return event
 
+def load_session(year: int = 2021, race_id: int = 1, *additional_info: str ):
+    return
+
 def load_lap_data(session: pd.DataFrame):
     return
