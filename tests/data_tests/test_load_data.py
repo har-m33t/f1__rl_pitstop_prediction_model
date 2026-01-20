@@ -33,14 +33,28 @@ class TestLoadEvent(unittest.TestCase):
 
     
 class TestLoadSession(unittest.TestCase):
-    def test_load_session_regular():
-        return
-    
-    def test_load_session_doesnt_exist():
-        return 
-    
-    def test_load_session_improper_type():
-        return
+
+    @patch("src.data.load_data.fastf1.get_session")
+    def test_load_session_regular(self, mock_get_session):
+        mock_session = MagicMock()
+        mock_get_session.return_value = mock_session
+
+        session = get_session(YEAR, 1, "R")
+
+        self.assertIs(session, mock_session)
+        mock_get_session.assert_called_once_with(YEAR, 1, "R")
+
+    @patch("src.data.load_data.fastf1.get_session")
+    def test_load_session_doesnt_exist(self, mock_get_session):
+        mock_get_session.side_effect = Exception("Invalid session")
+
+        with self.assertRaises(ValueError):
+            get_session(YEAR, 99, "R")
+
+    def test_load_session_improper_type(self):
+        with self.assertRaises(TypeError):
+            get_session("2021", "one", 5)
+
 
 class TestLoadLapData(unittest.TestCase):
     def test_load_lap_data_regular():
