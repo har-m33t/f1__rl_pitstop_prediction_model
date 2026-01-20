@@ -1,9 +1,11 @@
 import fastf1
+from fastf1.core import Session
+from fastf1.events import Event
 import pandas as pd
 
-def load_event(event_name: str, year: int = 2021) -> pd.DataFrame:
+def get_event_metadata(event_name: str, year: int = 2021) -> Event:
     """
-    Docstring for load_event
+    Docstring for get_event_metadata
     
     :param event_name: Event Name
         example: "French Grand Prix" 
@@ -18,9 +20,9 @@ def load_event(event_name: str, year: int = 2021) -> pd.DataFrame:
     event = fastf1.get_event(year, event_name)
     return event
 
-def load_session(year: int = 2021, race_id: int = 1, type: str = 'R' ):
+def get_session(year: int = 2021, race_id: int = 1, type: str = 'R' ) -> Session:
     """
-    Docstring for load_session
+    Docstring for get_session
     
     :param year: Year of Event
     :type year: int
@@ -32,7 +34,7 @@ def load_session(year: int = 2021, race_id: int = 1, type: str = 'R' ):
     session = fastf1.get_session(year, race_id, type)
     return session
 
-def load_lap_data(session: pd.DataFrame):
+def load_laps_from_session(session: pd.DataFrame):
     """
     Docstring for load_lap_data
     
