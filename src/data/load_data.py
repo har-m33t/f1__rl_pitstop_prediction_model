@@ -51,7 +51,9 @@ def load_laps_from_session(session: pd.DataFrame):
     """
 
     session.load() # load session data
-    lap_data = session.laps
-    return lap_data
+    laps = session.laps
+    if laps.empty:
+        raise ValueError("Loaded session contains no lap data")
+    return laps.copy()
 
 #TODO As more data is required, use this module to fetch more data from the FastF1 API
