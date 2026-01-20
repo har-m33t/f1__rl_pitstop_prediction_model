@@ -17,15 +17,19 @@ class TestLoadEvent(unittest.TestCase):
         mock_get_event.return_value = mock_event
 
         event = get_event_metadata(EVENT, YEAR)
+        self.assertIs(event, mock_event)
+        mock_get_event.assert_called_once_with(YEAR, EVENT)
 
-        self.assertIsInstance(event, pd.DataFrame)
-        self.assertEqual(event['EventName'], 'French Grand Prix')
-    
-    def test_load_event_doesnt_exist():
-        return 
-    
-    def test_load_event_improper_type():
-        return
+    @patch("src.data.load_data.fastf1.get_event")
+    def test_load_event_doesnt_exist(self, mock_get_event):
+        mock_get_event.side_effect = Exception("Event not found")
+
+        with self.assertRaises(ValueError):
+            get_event_metadata("Fake GP", YEAR)
+
+    def test_load_event_improper_type(self):
+        with self.assertRaises(TypeError):
+            get_event_metadata(123, YEAR)  # event_name must be str
 
     
 class TestLoadSession(unittest.TestCase):
