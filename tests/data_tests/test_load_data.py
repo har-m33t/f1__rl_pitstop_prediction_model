@@ -9,8 +9,14 @@ YEAR = 2021
 
 
 class TestLoadEvent(unittest.TestCase):
-    def test_load_event_regular(self):
-        event = load_event(EVENT, YEAR)
+
+    @patch("src.data.load_data.fastf1.get_event")
+    def test_load_event_regular(self, mock_get_event):
+        mock_event = MagicMock()
+        mock_event.EventName = EVENT
+        mock_get_event.return_value = mock_event
+
+        event = get_event_metadata(EVENT, YEAR)
 
         self.assertIsInstance(event, pd.DataFrame)
         self.assertEqual(event['EventName'], 'French Grand Prix')
