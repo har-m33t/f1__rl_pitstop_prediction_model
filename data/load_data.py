@@ -43,3 +43,5 @@ def load_lap_data(session: pd.DataFrame):
     session.load() # load session data
     lap_data = session.laps
     return lap_data
+
+#TODO As more data is required, use this module to fetch more data from the FastF1 API
