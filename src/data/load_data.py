@@ -20,6 +20,13 @@ def get_event_metadata(event_name: str, year: int = 2021) -> Event:
 
     Load event data for a given race track and year using the FastF1 API. 
     """
+
+    if not isinstance(event_name, str):
+        raise TypeError(f"event_name must be str, got {type(event_name).__name__}")
+    
+    if not isinstance(year, int):
+        raise TypeError(f"year must be int, got {type(year).__name__}")
+
     try:
         event = fastf1.get_event(year, event_name)
     except Exception as e: 
@@ -37,6 +44,14 @@ def get_session(year: int = 2021, race_id: int = 1, type: str = 'R' ) -> Session
     :param type: Q-> Qualifiying, R-> Race, etc. 
     :type type: str
     """
+
+    if not isinstance(year, int):
+        raise TypeError(f"year must be int, got {type(year).__name__}")
+    if not isinstance(race_id, int):
+        raise TypeError(f"race_id must be int, got {type(race_id).__name__}")
+    if not isinstance(type, str):
+        raise TypeError(f"session_type must be str, got {type(type).__name__}")
+
     try: 
         session = fastf1.get_session(year, race_id, type)
     except Exception as e: 
