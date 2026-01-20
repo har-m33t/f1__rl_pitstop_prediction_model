@@ -57,11 +57,21 @@ class TestLoadSession(unittest.TestCase):
 
 
 class TestLoadLapData(unittest.TestCase):
-    def test_load_lap_data_regular():
-        return
-    
-    def test_load_lap_data_session_doesnt_exist():
-        return 
-    
-    def test_load_session_improper_type():
-        return
+
+    def test_load_lap_data_regular(self):
+        mock_session = MagicMock()
+        mock_session.laps = pd.DataFrame({"LapTime": [1, 2, 3]})
+
+        df = load_laps_from_session(mock_session)
+
+        mock_session.load.assert_called_once()
+        self.assertIsInstance(df, pd.DataFrame)
+        self.assertFalse(df.empty)
+
+    def test_load_lap_data_session_doesnt_exist(self):
+        with self.assertRaises(AttributeError):
+            load_laps_from_session(None)
+
+    def test_load_lap_data_improper_type(self):
+        with self.assertRaises(AttributeError):
+            load_laps_from_session("not a session")
