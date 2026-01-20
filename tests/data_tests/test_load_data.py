@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 import pandas as pd
 
-from src.data.load_data import load_event, load_session, load_lap_data
+from src.data.load_data import get_event_metadata, get_session, load_laps_from_session
 
 EVENT = "French Grand Prix"
 YEAR = 2021
