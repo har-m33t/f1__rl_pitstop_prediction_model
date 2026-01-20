@@ -33,4 +33,13 @@ def load_session(year: int = 2021, race_id: int = 1, type: str = 'R' ):
     return session
 
 def load_lap_data(session: pd.DataFrame):
-    return
+    """
+    Docstring for load_lap_data
+    
+    :param session: Session object
+    :type session: pd.DataFrame
+    """
+
+    session.load() # load session data
+    lap_data = session.laps
+    return lap_data
