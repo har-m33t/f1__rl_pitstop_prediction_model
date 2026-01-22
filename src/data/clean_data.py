@@ -21,10 +21,25 @@ def change_time_to_seconds(df: pd.DataFrame) -> pd.DataFrame:
     for col in TIME_COLUMNS:
         df[col] = df[col].dt.total_seconds()
     return df
-    return 
 
-def handle_missing_values():
-    return 
+def handle_missing_numeric_values(df: pd.DataFrame) -> pd.DataFrame:
+    NUMERIC_COLS = [
+        "SpeedI1", "SpeedI2", "SpeedFL", "SpeedST",
+        "AirTemp", "TrackTemp", "Humidity", "WindSpeed"
+    ]
+
+    df[NUMERIC_COLS] = df.groupby("Track")[
+        NUMERIC_COLS
+    ].transform(lambda x: x.fillna(x.median()))    
+
+    return df
+
+def handle_missing_categorical_values(df: pd.DataFrame) -> pd.DataFrame:
+    df["Compound"] = df["Compound"].fillna('UNKNOWN') 
+    df["Rainfall"] = df["Rainfall"].fillna(0)
+
+    return df
+
 
 def filter_invalid_laps():
     return
