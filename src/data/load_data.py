@@ -75,3 +75,17 @@ def load_laps_from_session(session: pd.DataFrame):
     return laps.copy()
 
 #TODO As more data is required, use this module to fetch more data from the FastF1 API
+
+if __name__ == "__main__":
+    sesh = get_session(2021, 8)
+    laps = load_laps_from_session(sesh)
+
+    weather_data = laps.get_weather_data()
+    laps = laps.reset_index(drop = True)
+    weather_data = weather_data.reset_index(drop = True)
+
+    joined = pd.concat([laps, weather_data.loc[:, ~(weather_data.columns == 'Time')]], axis =1)
+    print(joined)
+    joined.to_csv('lap_data.csv')
+
+
