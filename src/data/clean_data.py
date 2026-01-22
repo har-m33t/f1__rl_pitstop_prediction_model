@@ -1,7 +1,16 @@
 import pandas as pd
 
-def drop_columns():
-    return 
+def drop_columns(df: pd.DataFrame) -> pd.DataFrame:
+    DROP_COLUMNS = [
+        "Deleted", "DeletedReason",
+        "FastF1Generated", "IsAccurate",
+        "LapStartDate",  # time leakage risk
+    ]
+
+    df = df.drop(columns=DROP_COLUMNS, errors = "ignore")
+    
+    return df
+
 
 def change_time_to_seconds():
     return 
