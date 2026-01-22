@@ -41,8 +41,13 @@ def handle_missing_categorical_values(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def filter_invalid_laps():
-    return
+def filter_invalid_laps(df: pd.DataFrame) -> pd.DataFrame:
+    df = df[
+        (df["LapTime"] > 60) &
+        (df["LapTime"] < 200) &
+        (~df["Deleted"])
+    ]
+    
 
 def clean_data(df: pd.DataFrame):
     return df
