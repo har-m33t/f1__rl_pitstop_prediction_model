@@ -49,5 +49,11 @@ def filter_invalid_laps(df: pd.DataFrame) -> pd.DataFrame:
     ]
     
 
-def clean_data(df: pd.DataFrame):
+def clean_data(df: pd.DataFrame) -> pd.DataFrame:
+    df = drop_columns(df)
+    df = change_time_to_seconds(df)
+    df = handle_missing_numeric_values(df)
+    df = handle_missing_categorical_values(df)
+    df = filter_invalid_laps(df)
+
     return df
