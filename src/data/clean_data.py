@@ -12,7 +12,15 @@ def drop_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def change_time_to_seconds():
+def change_time_to_seconds(df: pd.DataFrame) -> pd.DataFrame:
+    TIME_COLUMNS = [
+        "LapTime", "Sector1Time", "Sector2Time", 
+        "Sector3Time", "PitInTime", "PitOutTime"
+    ]
+
+    for col in TIME_COLUMNS:
+        df[col] = df[col].dt.total_seconds()
+    return df
     return 
 
 def handle_missing_values():
