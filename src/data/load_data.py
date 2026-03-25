@@ -3,7 +3,10 @@ from fastf1.core import Session
 from fastf1.events import Event
 import pandas as pd
 
-fastf1.Cache.enable_cache("data/raw") # store data locally for performance
+from src.config import CACHE_DIR
+
+# Use the centralized cache directory so no path is hardcoded here.
+fastf1.Cache.enable_cache(str(CACHE_DIR))
 
 
 def get_event_metadata(event_name: str, year: int = 2021) -> Event:
@@ -124,22 +127,8 @@ def load_all_data(years: list) -> pd.DataFrame:
     return pd.DataFrame()
 
 if __name__ == "__main__":
-    # Test loading data for a specific year's races (e.g., first 3 races of 2021)
-    # For full dataset, use `load_all_data([2021, 2022, 2023])`
-    schedule = fastf1.get_event_schedule(2021)
-    test_race_id = schedule['RoundNumber'].iloc[1] if len(schedule) > 1 else 1
-
-    sesh = get_session(2021, test_race_id)
-    laps = load_laps_from_session(sesh)
-
-    weather_data = laps.get_weather_data()
-    laps = laps.reset_index(drop = True)
-    weather_data = weather_data.reset_index(drop = True)
-
-    joined = pd.concat([laps, weather_data.loc[:, ~(weather_data.columns == 'Time')]], axis =1)
-    
-    joined['Year'] = 2021
-    joined['Track'] = schedule.loc[schedule['RoundNumber'] == test_race_id, 'EventName'].values[0]
-
-    print(joined.head())
-    joined.to_csv('lap_data.csv', index=False)
+    # Quick sanity check — run ingest.py for the full pipeline.
+    from src.config import TARGET_YEARS
+    print(f"Cache dir: {CACHE_DIR}")
+    print(f"Target years: {TARGET_YEARS}")
+    print("Run `python -m src.data.ingest` to execute the full pipeline.")
