@@ -46,12 +46,16 @@ build/
 
 # ── ML model artifacts ───────────────────────────────────────────────────────
 models/
+baseline/models/
 *.pkl
 *.joblib
 *.h5
 *.pt
 *.pth
 *.onnx
+
+# ── Generated outputs (charts, reports) ──────────────────────────────────────
+outputs/
 
 # ── Logs ─────────────────────────────────────────────────────────────────────
 *.log
