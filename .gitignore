@@ -63,3 +63,5 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+data/raw/fastf1_http_cache.sqlite
+lap_data.csv
