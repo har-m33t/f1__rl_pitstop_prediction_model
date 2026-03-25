@@ -1,0 +1,65 @@
+# ── Database files ──────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── FastF1 / HTTP cache ──────────────────────────────────────────────────────
+data/raw/fastf1_http_cache.sqlite
+data/raw/fastf1_cache/
+# Generic cache directories anywhere in the project
+cache/
+.cache/
+*_cache/
+*_http_cache.sqlite
+
+# ── Raw / processed race data ────────────────────────────────────────────────
+data/raw/
+data/processed/
+
+# ── Auto-generated CSV exports at project root ───────────────────────────────
+lap_data.csv
+lap_features_engineered.csv
+*.csv
+
+# ── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual environment ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Jupyter / IPython ────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ── Distribution / packaging ─────────────────────────────────────────────────
+dist/
+build/
+*.egg-info/
+*.egg
+
+# ── ML model artifacts ───────────────────────────────────────────────────────
+models/
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+*.onnx
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── OS / editor noise ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
