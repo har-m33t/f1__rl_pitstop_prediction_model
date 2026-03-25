@@ -65,3 +65,4 @@ Thumbs.db
 *.swp
 data/raw/fastf1_http_cache.sqlite
 lap_data.csv
+src/data/__pycache__/load_data.cpython-313.pyc
