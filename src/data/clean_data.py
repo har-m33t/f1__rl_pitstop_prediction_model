@@ -19,7 +19,14 @@ def change_time_to_seconds(df: pd.DataFrame) -> pd.DataFrame:
     ]
 
     for col in TIME_COLUMNS:
-        df[col] = df[col].dt.total_seconds()
+        if col in df.columns:
+            # If the column is completely loaded as strings from CSV, convert it to timedelta
+            if df[col].dtype == object:
+                df[col] = pd.to_timedelta(df[col])
+            # If it has a .dt accessor, extract seconds
+            if pd.api.types.is_timedelta64_dtype(df[col]):
+                df[col] = df[col].dt.total_seconds()
+            
     return df
 
 def handle_missing_numeric_values(df: pd.DataFrame) -> pd.DataFrame:
@@ -47,13 +54,16 @@ def filter_invalid_laps(df: pd.DataFrame) -> pd.DataFrame:
         (df["LapTime"] < 200) &
         (~df["Deleted"])
     ]
+
+    return df
     
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
-    df = drop_columns(df)
+    
     df = change_time_to_seconds(df)
+    df = filter_invalid_laps(df)
+    df = drop_columns(df)
     df = handle_missing_numeric_values(df)
     df = handle_missing_categorical_values(df)
-    df = filter_invalid_laps(df)
 
     return df
