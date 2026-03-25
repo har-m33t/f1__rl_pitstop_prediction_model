@@ -47,6 +47,7 @@ build/
 # ── ML model artifacts ───────────────────────────────────────────────────────
 models/
 baseline/models/
+rl/models/
 *.pkl
 *.joblib
 *.h5
