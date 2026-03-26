@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>STRAT-OS | F1 Pit Stop Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        bg:       "#111111",
+        surface0: "#0e0e0e",
+        surface1: "#1a1a1a",
+        surface2: "#222222",
+        surface3: "#2a2a2a",
+        red:      "#e8002d",
+        redglow:  "rgba(232,0,45,0.25)",
+        green:    "#00e639",
+        blue:     "#79d1fc",
+        muted:    "#c6c6c7",
+        dim:      "#555555",
+      },
+      fontFamily: {
+        headline: ["Space Grotesk","sans-serif"],
+        body:     ["Inter","sans-serif"],
+        mono:     ["JetBrains Mono","monospace"],
+      },
+    },
+  },
+}
+</script>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#111111;color:#e5e2e1;overflow-x:hidden}
+  .carbon{background-image:radial-gradient(#1c1b1b 1px,transparent 0);background-size:4px 4px}
+  .ms{font-family:'Material Symbols Outlined';font-size:20px;line-height:1;font-variation-settings:'FILL' 0,'wght' 400}
+  .glow-red{box-shadow:0 0 12px rgba(232,0,45,.45)}
+  .glow-green{box-shadow:0 0 10px rgba(0,230,57,.35)}
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-track{background:#111}
+  ::-webkit-scrollbar-thumb{background:#e8002d}
+  .pulse{animation:pulse 2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .blink{animation:blink 1s step-end infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+  /* Tire wear animation */
+  .bar-fill{transition:width 1s ease}
+  /* Driver card hover overlay */
+  .dqn-overlay{opacity:0;transition:opacity .2s}
+  .driver-card:hover .dqn-overlay{opacity:1}
+</style>
+</head>
+<body class="flex flex-col min-h-screen carbon">
+
+<!-- ══ TOPBAR ══════════════════════════════════════════════════════════════ -->
+<header class="fixed top-0 left-0 right-0 z-50 h-12 flex items-center justify-between px-6 bg-surface0 border-b border-white/5">
+  <div class="flex items-center gap-6">
+    <span class="font-headline font-black italic text-red text-xl tracking-tighter">STRAT-OS</span>
+    <div class="hidden md:flex gap-1">
+      <a href="#dashboard" class="text-[10px] font-mono uppercase tracking-widest px-3 py-1 border-b-2 border-red text-white">DASHBOARD</a>
+      <a href="#strategy"  class="text-[10px] font-mono uppercase tracking-widest px-3 py-1 text-muted hover:text-white hover:bg-surface3 transition-colors">STRATEGY</a>
+      <a href="#tyres"     class="text-[10px] font-mono uppercase tracking-widest px-3 py-1 text-muted hover:text-white hover:bg-surface3 transition-colors">TYRES</a>
+      <a href="#model"     class="text-[10px] font-mono uppercase tracking-widest px-3 py-1 text-muted hover:text-white hover:bg-surface3 transition-colors">RL MODEL</a>
+    </div>
+  </div>
+  <div class="flex items-center gap-4">
+    <div class="flex items-center gap-2 text-[10px] font-mono text-muted">
+      <span class="w-2 h-2 rounded-full bg-green pulse inline-block"></span>
+      MONACO GP · LAP <span id="liveLap" class="text-white font-bold">42</span>/78
+    </div>
+    <div class="text-[10px] font-mono text-muted">SUNNY 24°C</div>
+    <span class="ms text-muted cursor-pointer hover:text-white transition-colors">notifications</span>
+    <span class="ms text-muted cursor-pointer hover:text-white transition-colors">account_circle</span>
+  </div>
+</header>
+
+<!-- ══ SIDENAV ═════════════════════════════════════════════════════════════ -->
+<nav class="fixed left-0 top-12 bottom-8 z-40 w-16 flex flex-col items-center py-4 gap-3 bg-surface0 border-r border-white/5">
+  <button onclick="setTab('dashboard')" id="tab-dashboard" class="nav-btn w-10 h-10 flex items-center justify-center bg-red text-white transition-all group relative">
+    <span class="ms">dashboard</span>
+    <span class="tooltip absolute left-14 bg-surface3 text-[9px] font-mono px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">DASHBOARD</span>
+  </button>
+  <button onclick="setTab('strategy')" id="tab-strategy" class="nav-btn w-10 h-10 flex items-center justify-center text-dim hover:text-white hover:bg-surface2 transition-all group relative">
+    <span class="ms">route</span>
+    <span class="tooltip absolute left-14 bg-surface3 text-[9px] font-mono px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">STRATEGY</span>
+  </button>
+  <button onclick="setTab('tyres')" id="tab-tyres" class="nav-btn w-10 h-10 flex items-center justify-center text-dim hover:text-white hover:bg-surface2 transition-all group relative">
+    <span class="ms">tire_repair</span>
+    <span class="tooltip absolute left-14 bg-surface3 text-[9px] font-mono px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">TYRES</span>
+  </button>
+  <button onclick="setTab('model')" id="tab-model" class="nav-btn w-10 h-10 flex items-center justify-center text-dim hover:text-white hover:bg-surface2 transition-all group relative">
+    <span class="ms">model_training</span>
+    <span class="tooltip absolute left-14 bg-surface3 text-[9px] font-mono px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">RL MODEL</span>
+  </button>
+  <div class="flex-1"></div>
+  <button class="w-10 h-10 flex items-center justify-center text-dim hover:text-white hover:bg-surface2 transition-all">
+    <span class="ms">settings</span>
+  </button>
+</nav>
+
+<!-- ══ MAIN ════════════════════════════════════════════════════════════════ -->
+<main class="ml-16 mt-12 mb-8 p-4 flex flex-col gap-4">
+
+  <!-- ─── TAB: DASHBOARD ──────────────────────────────────────────────── -->
+  <div id="page-dashboard" class="flex flex-col gap-4">
+
+    <!-- ROW 1: 4 KPI tiles -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="bg-surface1 border-l-2 border-red p-3">
+        <div class="text-[9px] font-mono uppercase tracking-widest text-dim">Optimal Pit Window</div>
+        <div class="font-headline font-black text-white text-lg mt-1">LAP 45–50</div>
+        <div class="text-[10px] font-mono text-green mt-1">▲ OPEN</div>
+      </div>
+      <div class="bg-surface1 border-l-2 border-dim p-3">
+        <div class="text-[9px] font-mono uppercase tracking-widest text-dim">Track Temp</div>
+        <div class="font-headline font-black text-white text-lg mt-1">48.2°C</div>
+        <div class="text-[10px] font-mono text-muted mt-1">STABLE</div>
+      </div>
+      <div class="bg-surface1 border-l-2 border-dim p-3">
+        <div class="text-[9px] font-mono uppercase tracking-widest text-dim">SC Probability</div>
+        <div class="font-headline font-black text-white text-lg mt-1">12%</div>
+        <div class="text-[10px] font-mono text-muted mt-1">LOW RISK</div>
+      </div>
+      <div class="bg-surface1 border-l-2 border-dim p-3">
+        <div class="text-[9px] font-mono uppercase tracking-widest text-dim">DQN Confidence</div>
+        <div class="font-headline font-black text-white text-lg mt-1">84.3%</div>
+        <div class="text-[10px] font-mono text-green mt-1">PIT RECOMMENDED</div>
+      </div>
+    </div>
+
+    <!-- ROW 2: Driver Cards + Chart -->
+    <div class="grid grid-cols-12 gap-4">
+
+      <!-- Driver cards -->
+      <div class="col-span-12 lg:col-span-5 grid grid-cols-2 gap-3">
+        <!-- P1 -->
+        <div class="driver-card bg-surface1 p-4 relative overflow-hidden cursor-pointer">
+          <div class="absolute top-0 left-0 w-1 h-full bg-red"></div>
+          <div class="text-[9px] font-mono text-dim uppercase tracking-widest">P1 · LAP 42</div>
+          <div class="font-headline font-black text-white text-xl mt-1 italic">VERSTAPPEN</div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-red inline-block"></span>
+            <span class="font-mono text-xs">SOFT · 18L</span>
+          </div>
+          <div class="mt-3">
+            <div class="flex justify-between text-[9px] font-mono text-dim mb-1"><span>TYRE INTEGRITY</span><span id="ver-pct">64%</span></div>
+            <div class="h-1 bg-surface3 w-full"><div id="ver-bar" class="h-full bg-red bar-fill glow-red" style="width:64%"></div></div>
+          </div>
+          <div class="font-mono text-green text-xs mt-2">+12.482s to P2</div>
+          <!-- DQN overlay -->
+          <div class="dqn-overlay absolute inset-0 bg-surface0/90 flex flex-col items-center justify-center">
+            <span class="text-[9px] font-mono bg-red px-2 py-0.5 text-white mb-1">DQN RECOMMENDATION</span>
+            <span class="font-mono font-bold text-white text-base">BOX LAP 47</span>
+            <span class="text-[9px] font-mono text-muted mt-1">EST. DELTA −2.1s</span>
+          </div>
+        </div>
+        <!-- P2 -->
+        <div class="driver-card bg-surface1 p-4 relative overflow-hidden cursor-pointer">
+          <div class="absolute top-0 left-0 w-1 h-full bg-green"></div>
+          <div class="text-[9px] font-mono text-dim uppercase tracking-widest">P2 · LAP 42</div>
+          <div class="font-headline font-black text-white text-xl mt-1 italic">LECLERC</div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500 inline-block"></span>
+            <span class="font-mono text-xs">MED · 12L</span>
+          </div>
+          <div class="mt-3">
+            <div class="flex justify-between text-[9px] font-mono text-dim mb-1"><span>TYRE INTEGRITY</span><span>42%</span></div>
+            <div class="h-1 bg-surface3 w-full"><div class="h-full bg-green bar-fill glow-green" style="width:42%"></div></div>
+          </div>
+          <div class="font-mono text-red text-xs mt-2">−0.842s interval</div>
+          <div class="dqn-overlay absolute inset-0 bg-surface0/90 flex flex-col items-center justify-center">
+            <span class="text-[9px] font-mono bg-red px-2 py-0.5 text-white mb-1">DQN RECOMMENDATION</span>
+            <span class="font-mono font-bold text-white text-base">BOX NOW</span>
+            <span class="text-[9px] font-mono text-muted mt-1">TYRES CRITICAL</span>
+          </div>
+        </div>
+        <!-- P3 -->
+        <div class="driver-card bg-surface1 p-4 relative overflow-hidden cursor-pointer">
+          <div class="absolute top-0 left-0 w-1 h-full" style="background:#27F4D2"></div>
+          <div class="text-[9px] font-mono text-dim uppercase tracking-widest">P3 · LAP 42</div>
+          <div class="font-headline font-black text-white text-xl mt-1 italic">HAMILTON</div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-white inline-block"></span>
+            <span class="font-mono text-xs">HARD · 21L</span>
+          </div>
+          <div class="mt-3">
+            <div class="flex justify-between text-[9px] font-mono text-dim mb-1"><span>TYRE INTEGRITY</span><span>71%</span></div>
+            <div class="h-1 bg-surface3 w-full"><div class="h-full bar-fill" style="width:71%;background:#27F4D2"></div></div>
+          </div>
+          <div class="font-mono text-muted text-xs mt-2">+4.104s</div>
+          <div class="dqn-overlay absolute inset-0 bg-surface0/90 flex flex-col items-center justify-center">
+            <span class="text-[9px] font-mono bg-surface3 px-2 py-0.5 text-white mb-1">DQN RECOMMENDATION</span>
+            <span class="font-mono font-bold text-white text-base">STAY OUT</span>
+            <span class="text-[9px] font-mono text-muted mt-1">ΔQ = −0.31</span>
+          </div>
+        </div>
+        <!-- P4 -->
+        <div class="driver-card bg-surface1 p-4 relative overflow-hidden cursor-pointer">
+          <div class="absolute top-0 left-0 w-1 h-full" style="background:#F91536"></div>
+          <div class="text-[9px] font-mono text-dim uppercase tracking-widest">P4 · LAP 42</div>
+          <div class="font-headline font-black text-white text-xl mt-1 italic">NORRIS</div>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-red inline-block"></span>
+            <span class="font-mono text-xs">SOFT · 08L</span>
+          </div>
+          <div class="mt-3">
+            <div class="flex justify-between text-[9px] font-mono text-dim mb-1"><span>TYRE INTEGRITY</span><span>88%</span></div>
+            <div class="h-1 bg-surface3 w-full"><div class="h-full bg-red bar-fill" style="width:88%"></div></div>
+          </div>
+          <div class="font-mono text-muted text-xs mt-2">+8.551s</div>
+          <div class="dqn-overlay absolute inset-0 bg-surface0/90 flex flex-col items-center justify-center">
+            <span class="text-[9px] font-mono bg-surface3 px-2 py-0.5 text-white mb-1">DQN RECOMMENDATION</span>
+            <span class="font-mono font-bold text-white text-base">STAY OUT</span>
+            <span class="text-[9px] font-mono text-muted mt-1">TYRES FRESH</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lap Time Delta Chart -->
+      <div class="col-span-12 lg:col-span-7 bg-surface1 p-4">
+        <div class="flex justify-between items-center mb-3">
+          <div>
+            <div class="font-headline font-bold text-white text-sm uppercase tracking-tight">Lap Time Delta Trends</div>
+            <div class="text-[9px] font-mono text-dim uppercase tracking-widest">REAL-TIME TELEMETRY</div>
+          </div>
+          <div class="flex gap-4">
+            <span class="flex items-center gap-1 text-[9px] font-mono"><span class="w-3 h-0.5 bg-red inline-block"></span>VER</span>
+            <span class="flex items-center gap-1 text-[9px] font-mono"><span class="w-3 h-0.5 bg-green inline-block"></span>LEC</span>
+            <span class="flex items-center gap-1 text-[9px] font-mono"><span class="w-3 h-0.5 bg-blue inline-block"></span>HAM</span>
+          </div>
+        </div>
+        <div class="relative h-48 border-l border-b border-white/10">
+          <svg class="w-full h-full absolute inset-0" viewBox="0 0 1000 180" preserveAspectRatio="none">
+            <!-- Grid -->
+            <line x1="0" y1="45"  x2="1000" y2="45"  stroke="white" stroke-width="0.3" opacity="0.1"/>
+            <line x1="0" y1="90"  x2="1000" y2="90"  stroke="white" stroke-width="0.3" opacity="0.1"/>
+            <line x1="0" y1="135" x2="1000" y2="135" stroke="white" stroke-width="0.3" opacity="0.1"/>
+            <!-- VER: red - degrading quickly -->
+            <path d="M0,80 Q80,72 160,100 T320,115 T500,100 T680,78 T850,55 T1000,60" fill="none" stroke="#e8002d" stroke-width="2"/>
+            <!-- LEC: green - already degraded -->
+            <path d="M0,100 Q100,95 200,118 T400,135 T600,148 T800,140 T1000,150" fill="none" stroke="#00e639" stroke-width="2"/>
+            <!-- HAM: blue - hard tyre, stable -->
+            <path d="M0,60 Q150,65 300,68 T500,72 T700,80 T900,88 T1000,92" fill="none" stroke="#79d1fc" stroke-width="2"/>
+            <!-- Pit window annotation -->
+            <rect x="760" y="0" width="120" height="180" fill="#e8002d" opacity="0.06"/>
+            <text x="820" y="12" text-anchor="middle" fill="#e8002d" font-size="10" font-family="JetBrains Mono" opacity="0.8">PIT WINDOW</text>
+          </svg>
+        </div>
+        <div class="flex justify-between mt-1 text-[8px] font-mono text-dim">
+          <span>LAP 20</span><span>LAP 25</span><span>LAP 30</span><span>LAP 35</span><span>LAP 40</span><span>LAP 45</span><span>LAP 48</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 3: Event Timeline -->
+    <div class="bg-surface1 p-4">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="text-[9px] font-mono uppercase tracking-widest text-dim">Event Timeline</div>
+        <div class="flex-1 h-px bg-white/5"></div>
+        <div class="flex items-center gap-1 text-[9px] font-mono text-green"><span class="blink">●</span> LIVE</div>
+      </div>
+      <div class="relative overflow-x-auto">
+        <div class="min-w-[800px] relative py-6 flex items-center">
+          <div class="absolute h-0.5 w-full bg-surface3 top-1/2 -translate-y-1/2"></div>
+          <div class="relative flex w-full justify-around">
+            <!-- SC event -->
+            <div class="flex flex-col items-center gap-1 group cursor-pointer relative">
+              <span class="text-[8px] font-mono text-yellow-400 -mt-4">SC</span>
+              <div class="w-3 h-3 rounded-full bg-yellow-400 border-2 border-bg pulse"></div>
+              <div class="absolute top-8 bg-surface3 text-[8px] font-mono px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity border border-yellow-400/30">SAFETY CAR L12–L15</div>
+            </div>
+            <!-- PIT VER -->
+            <div class="flex flex-col items-center gap-1 group cursor-pointer relative">
+              <span class="text-[8px] font-mono text-red -mt-4">PIT</span>
+              <div class="w-3 h-3 rounded-full bg-red border-2 border-bg glow-red"></div>
+              <div class="absolute top-8 bg-surface3 text-[8px] font-mono px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity border border-red/30">VER PIT L28 (2.4s)</div>
+            </div>
+            <!-- VSC -->
+            <div class="flex flex-col items-center gap-1 group cursor-pointer relative">
+              <span class="text-[8px] font-mono text-yellow-600 -mt-4">VSC</span>
+              <div class="w-3 h-3 rounded-full bg-yellow-600/50 border-2 border-bg"></div>
+              <div class="absolute top-8 bg-surface3 text-[8px] font-mono px-2 py-1 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity border border-yellow-600/20">VSC L35</div>
+            </div>
+            <!-- LIVE position -->
+            <div class="flex flex-col items-center gap-1 relative">
+              <span class="text-[8px] font-mono text-red blink -mt-4">NOW</span>
+              <div class="w-5 h-5 bg-red transform rotate-45 glow-red flex items-center justify-center">
+                <span class="ms text-white text-[10px] -rotate-45" style="font-size:10px">navigation</span>
+              </div>
+            </div>
+            <!-- Predicted pit window -->
+            <div class="flex flex-col items-center gap-1 relative opacity-60">
+              <span class="text-[8px] font-mono text-red -mt-4">EST.</span>
+              <div class="w-16 h-3 border border-dashed border-red/50 flex items-center justify-center">
+                <span class="text-[7px] font-mono text-red">L45–50</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 4: Dense telemetry -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="bg-surface0 border-l-2 border-surface3 p-3">
+        <div class="text-[9px] font-mono text-dim uppercase tracking-widest">Fuel On Board</div>
+        <div class="flex justify-between items-end mt-1">
+          <span class="font-mono text-xl font-bold">42.8 KG</span>
+          <span class="text-[9px] font-mono text-green">−0.2 TGT</span>
+        </div>
+      </div>
+      <div class="bg-surface0 border-l-2 border-surface3 p-3">
+        <div class="text-[9px] font-mono text-dim uppercase tracking-widest">ERS Deployment</div>
+        <div class="flex justify-between items-end mt-1">
+          <span class="font-mono text-xl font-bold">84%</span>
+          <div class="flex gap-0.5 mb-1">
+            <div class="w-1 h-3 bg-green"></div><div class="w-1 h-3 bg-green"></div>
+            <div class="w-1 h-3 bg-green"></div><div class="w-1 h-3 bg-surface3"></div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-surface0 border-l-2 border-surface3 p-3">
+        <div class="text-[9px] font-mono text-dim uppercase tracking-widest">Brake Temp (FR)</div>
+        <div class="flex justify-between items-end mt-1">
+          <span class="font-mono text-xl font-bold">642°C</span>
+          <span class="text-[9px] font-mono text-red">STRESSED</span>
+        </div>
+      </div>
+      <div class="bg-surface0 border-l-2 border-surface3 p-3">
+        <div class="text-[9px] font-mono text-dim uppercase tracking-widest">Last Sector</div>
+        <div class="flex justify-between items-end mt-1">
+          <span class="font-mono text-xl font-bold">24.182</span>
+          <span class="text-[9px] font-mono text-green">PB</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: STRATEGY ─────────────────────────────────────────────────── -->
+  <div id="page-strategy" class="hidden grid grid-cols-12 gap-4">
+    <div class="col-span-12 lg:col-span-8 bg-surface1 p-4">
+      <div class="flex justify-between items-center mb-3">
+        <div class="text-[9px] font-mono uppercase tracking-widest text-dim">Full-Field Pit Decision Timeline</div>
+        <div class="flex gap-3 text-[9px] font-mono">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 bg-red inline-block"></span>SOFT</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 bg-yellow-500 inline-block"></span>MED</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 bg-white inline-block"></span>HARD</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 border border-white/40 border-dashed inline-block"></span>RL PRED</span>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <div class="min-w-[700px] space-y-2">
+          <!-- Each row: driver stint map -->
+          <div class="group cursor-pointer">
+            <div class="flex items-center h-8 bg-surface0 hover:bg-surface2 transition-colors">
+              <div class="w-16 font-mono text-xs font-bold text-white px-2 border-r border-white/5">VER</div>
+              <div class="flex-grow flex h-full relative">
+                <div class="h-full bg-red/30" style="width:30%"></div>
+                <div class="h-full bg-yellow-500/30" style="width:40%"></div>
+                <div class="h-full bg-white/15" style="width:30%"></div>
+                <div class="absolute top-0 bottom-0 left-[30%] w-0.5 bg-red glow-red z-10"></div>
+                <div class="absolute top-0 bottom-0 left-[70%] w-0.5 bg-red z-10"></div>
+                <div class="absolute top-0 bottom-0 left-[68%] w-0.5 border-l border-dashed border-white/40"></div>
+              </div>
+            </div>
+          </div>
+          <div class="flex items-center h-8 bg-surface0">
+            <div class="w-16 font-mono text-xs font-bold text-white px-2 border-r border-white/5">HAM</div>
+            <div class="flex-grow flex h-full relative">
+              <div class="h-full bg-yellow-500/30" style="width:42%"></div>
+              <div class="h-full bg-white/15" style="width:58%"></div>
+              <div class="absolute top-0 bottom-0 left-[42%] w-0.5 bg-red z-10"></div>
+              <div class="absolute top-0 bottom-0 left-[40%] w-0.5 border-l border-dashed border-white/40"></div>
+            </div>
+          </div>
+          <div class="flex items-center h-8 bg-surface0">
+            <div class="w-16 font-mono text-xs font-bold text-white px-2 border-r border-white/5">LEC</div>
+            <div class="flex-grow flex h-full relative">
+              <div class="h-full bg-red/30" style="width:28%"></div>
+              <div class="h-full bg-yellow-500/30" style="width:42%"></div>
+              <div class="h-full bg-white/15" style="width:30%"></div>
+              <div class="absolute top-0 bottom-0 left-[28%] w-0.5 bg-red z-10"></div>
+              <div class="absolute top-0 bottom-0 left-[70%] w-0.5 bg-red z-10"></div>
+              <div class="absolute top-0 bottom-0 left-[72%] w-0.5 border-l border-dashed border-white/40"></div>
+            </div>
+          </div>
+          <div class="flex items-center h-8 bg-surface0">
+            <div class="w-16 font-mono text-xs font-bold text-white px-2 border-r border-white/5">NOR</div>
+            <div class="flex-grow flex h-full relative">
+              <div class="h-full bg-red/30" style="width:55%"></div>
+              <div class="h-full bg-white/15" style="width:45%"></div>
+              <div class="absolute top-0 bottom-0 left-[55%] w-0.5 bg-red z-10"></div>
+              <div class="absolute top-0 bottom-0 left-[60%] w-0.5 border-l border-dashed border-white/40"></div>
+            </div>
+          </div>
+          <!-- Lap markers -->
+          <div class="flex pl-16 text-[8px] font-mono text-dim">
+            <span class="flex-1 text-center">L1</span><span class="flex-1 text-center">L20</span>
+            <span class="flex-1 text-center">L40</span><span class="flex-1 text-center">L60</span><span class="flex-1 text-center">L78</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-span-12 lg:col-span-4 bg-surface1 p-4 border-l-2 border-red">
+      <div class="text-[9px] font-mono uppercase tracking-widest text-dim mb-4">Strategy Comparison</div>
+      <div class="grid grid-cols-2 gap-2 mb-4">
+        <div class="bg-surface0 p-3">
+          <div class="text-[8px] font-mono text-dim uppercase">Actual Strategy</div>
+          <div class="font-mono font-bold text-white mt-1">2-STOP (S-M-H)</div>
+        </div>
+        <div class="bg-surface0 border-l-2 border-red p-3">
+          <div class="text-[8px] font-mono text-dim uppercase">RL Optimizer</div>
+          <div class="font-mono font-bold text-white mt-1">1-STOP (S-H)</div>
+        </div>
+      </div>
+      <div class="text-[9px] font-mono text-dim mb-2">PREDICTED SCENARIOS</div>
+      <div class="flex flex-col gap-1">
+        <div class="flex justify-between items-center p-2 bg-surface0 hover:bg-surface2 cursor-pointer transition-colors">
+          <span class="text-xs font-mono">Scenario A: Aggressive</span>
+          <span class="ms text-dim" style="font-size:14px">chevron_right</span>
+        </div>
+        <div class="flex justify-between items-center p-2 bg-surface0 hover:bg-surface2 cursor-pointer transition-colors">
+          <span class="text-xs font-mono">Scenario B: Defensive</span>
+          <span class="ms text-dim" style="font-size:14px">chevron_right</span>
+        </div>
+        <div class="flex justify-between items-center p-2 bg-surface0 hover:bg-surface2 cursor-pointer transition-colors">
+          <span class="text-xs font-mono">Scenario C: Fuel Save</span>
+          <span class="ms text-dim" style="font-size:14px">chevron_right</span>
+        </div>
+      </div>
+      <button class="mt-4 w-full bg-red text-white font-headline font-black italic uppercase py-2 text-sm tracking-tight hover:bg-red/80 transition-colors">
+        EXECUTE BOX THIS LAP
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── TAB: TYRES ────────────────────────────────────────────────────── -->
+  <div id="page-tyres" class="hidden grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-surface1 p-4 col-span-2 lg:col-span-4 text-[9px] font-mono text-dim uppercase tracking-widest mb-1">Compound Degradation Model</div>
+    <div class="bg-surface1 p-4 border-t-2 border-red">
+      <div class="flex items-center gap-2 mb-3"><span class="w-3 h-3 rounded-full bg-red inline-block"></span><span class="font-mono font-bold">SOFT</span></div>
+      <svg class="w-full h-24" viewBox="0 0 100 60"><path d="M0,5 Q20,6 40,15 T70,40 T100,58" fill="none" stroke="#e8002d" stroke-width="2"/><path d="M0,5 Q20,6 40,15 T70,40 T100,58 L100,60 L0,60Z" fill="#e8002d" opacity="0.1"/></svg>
+      <div class="text-[9px] font-mono text-dim mt-2">Deg rate: <span class="text-red">HIGH</span> · Life: ~25L</div>
+    </div>
+    <div class="bg-surface1 p-4 border-t-2 border-yellow-500">
+      <div class="flex items-center gap-2 mb-3"><span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span><span class="font-mono font-bold">MEDIUM</span></div>
+      <svg class="w-full h-24" viewBox="0 0 100 60"><path d="M0,5 Q30,7 60,22 T100,50" fill="none" stroke="#eab308" stroke-width="2"/><path d="M0,5 Q30,7 60,22 T100,50 L100,60 L0,60Z" fill="#eab308" opacity="0.1"/></svg>
+      <div class="text-[9px] font-mono text-dim mt-2">Deg rate: <span class="text-yellow-400">MEDIUM</span> · Life: ~35L</div>
+    </div>
+    <div class="bg-surface1 p-4 border-t-2 border-white/30">
+      <div class="flex items-center gap-2 mb-3"><span class="w-3 h-3 rounded-full bg-white inline-block"></span><span class="font-mono font-bold">HARD</span></div>
+      <svg class="w-full h-24" viewBox="0 0 100 60"><path d="M0,5 Q40,6 70,18 T100,35" fill="none" stroke="white" stroke-width="2"/><path d="M0,5 Q40,6 70,18 T100,35 L100,60 L0,60Z" fill="white" opacity="0.06"/></svg>
+      <div class="text-[9px] font-mono text-dim mt-2">Deg rate: <span class="text-muted">LOW</span> · Life: ~50L</div>
+    </div>
+    <div class="bg-surface1 p-4 border-t-2 border-blue">
+      <div class="flex items-center gap-2 mb-3"><span class="w-3 h-3 rounded-full bg-blue inline-block"></span><span class="font-mono font-bold">INTER</span></div>
+      <svg class="w-full h-24" viewBox="0 0 100 60"><path d="M0,30 Q30,20 50,25 T100,20" fill="none" stroke="#79d1fc" stroke-width="2"/><path d="M0,30 Q30,20 50,25 T100,20 L100,60 L0,60Z" fill="#79d1fc" opacity="0.08"/></svg>
+      <div class="text-[9px] font-mono text-dim mt-2">Deg rate: <span class="text-blue">VARIABLE</span></div>
+    </div>
+  </div>
+
+  <!-- ─── TAB: RL MODEL ────────────────────────────────────────────────── -->
+  <div id="page-model" class="hidden grid grid-cols-12 gap-4">
+    <div class="col-span-12 lg:col-span-6 bg-surface1 p-4">
+      <div class="text-[9px] font-mono uppercase tracking-widest text-dim mb-3">DQN Agent — State Observation</div>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] font-mono text-muted">obs[0] lap_number</span>
+          <div class="flex-1 mx-4 h-1 bg-surface3"><div class="h-full bg-blue" style="width:60%"></div></div>
+          <span class="font-mono text-xs text-white">0.60</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] font-mono text-muted">obs[1] tire_age</span>
+          <div class="flex-1 mx-4 h-1 bg-surface3"><div class="h-full bg-red" style="width:36%"></div></div>
+          <span class="font-mono text-xs text-white">0.36</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] font-mono text-muted">obs[2] degradation_rate</span>
+          <div class="flex-1 mx-4 h-1 bg-surface3"><div class="h-full bg-red glow-red" style="width:77%"></div></div>
+          <span class="font-mono text-xs text-red font-bold">0.77 ↑</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] font-mono text-muted">obs[3] track_temp</span>
+          <div class="flex-1 mx-4 h-1 bg-surface3"><div class="h-full bg-yellow-500" style="width:53%"></div></div>
+          <span class="font-mono text-xs text-white">0.53</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-[10px] font-mono text-muted">obs[4] safety_car_flag</span>
+          <div class="flex-1 mx-4 h-1 bg-surface3"><div class="h-full bg-green" style="width:0%"></div></div>
+          <span class="font-mono text-xs text-dim">0</span>
+        </div>
+      </div>
+      <div class="mt-4 pt-3 border-t border-white/5 grid grid-cols-2 gap-2">
+        <div class="bg-surface0 p-2">
+          <div class="text-[8px] font-mono text-dim">Q(STAY OUT)</div>
+          <div class="font-mono text-white font-bold text-base">−91.4</div>
+        </div>
+        <div class="bg-red/10 border border-red/30 p-2">
+          <div class="text-[8px] font-mono text-red">Q(PIT) ← PREFERRED</div>
+          <div class="font-mono text-red font-bold text-base">−89.1</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-span-12 lg:col-span-6 bg-surface1 p-4">
+      <div class="text-[9px] font-mono uppercase tracking-widest text-dim mb-3">Agent vs Baseline Performance</div>
+      <div class="space-y-3">
+        <div>
+          <div class="flex justify-between text-[9px] font-mono mb-1"><span class="text-dim">DQN Agent</span><span class="text-green">Win-Rate 61%</span></div>
+          <div class="h-2 bg-surface3"><div class="h-full bg-green glow-green" style="width:61%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-[9px] font-mono mb-1"><span class="text-dim">Heuristic (Deg Threshold)</span><span class="text-muted">Win-Rate 24%</span></div>
+          <div class="h-2 bg-surface3"><div class="h-full bg-blue" style="width:24%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-[9px] font-mono mb-1"><span class="text-dim">Fixed Interval (20L)</span><span class="text-muted">Win-Rate 11%</span></div>
+          <div class="h-2 bg-surface3"><div class="h-full bg-muted/40" style="width:11%"></div></div>
+        </div>
+        <div>
+          <div class="flex justify-between text-[9px] font-mono mb-1"><span class="text-dim">Random Policy</span><span class="text-muted">Win-Rate 4%</span></div>
+          <div class="h-2 bg-surface3"><div class="h-full bg-dim" style="width:4%"></div></div>
+        </div>
+      </div>
+      <div class="mt-4 pt-3 border-t border-white/5">
+        <div class="text-[9px] font-mono text-dim mb-2">COUNTERFACTUAL: If degradation −10%</div>
+        <div class="bg-surface0 p-2 flex justify-between items-center">
+          <span class="text-[10px] font-mono text-muted">Decision flipped on</span>
+          <span class="font-mono text-white font-bold">3 / 55 laps</span>
+        </div>
+        <div class="text-[8px] font-mono text-dim mt-1">Strategy robust to moderate degradation variance</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+<footer class="fixed bottom-0 left-0 right-0 h-8 z-50 flex justify-between items-center px-6 bg-surface0 border-t border-white/5">
+  <div class="flex gap-6 text-[9px] font-mono">
+    <span class="text-red font-bold">LIVE STATUS: NOMINAL</span>
+    <span class="text-dim">TELEMETRY: CONNECTED</span>
+    <span class="text-dim">MODEL: DQN v2.7.1</span>
+  </div>
+  <div class="flex gap-6 text-[9px] font-mono text-dim">
+    <span>LATENCY: 14MS</span>
+    <span class="text-white">SESSION: LIVE</span>
+  </div>
+</footer>
+
+<!-- ══ TAB SWITCHING JS ════════════════════════════════════════════════════ -->
+<script>
+const PAGES = ['dashboard','strategy','tyres','model'];
+
+function setTab(name) {
+  PAGES.forEach(p => {
+    const page = document.getElementById('page-'+p);
+    const btn  = document.getElementById('tab-'+p);
+    if (!page || !btn) return;
+    const active = p === name;
+    page.classList.toggle('hidden', !active);
+    btn.classList.toggle('bg-red', active);
+    btn.classList.toggle('text-white', active);
+    btn.classList.toggle('text-dim', !active);
+    btn.classList.toggle('hover:text-white', !active);
+    btn.classList.toggle('hover:bg-surface2', !active);
+  });
+}
+
+// Animate live lap counter
+let lap = 42;
+setInterval(() => {
+  const el = document.getElementById('liveLap');
+  if (el && Math.random() < 0.1 && lap < 78) {
+    lap++;
+    el.textContent = lap;
+  }
+}, 3000);
+
+// Animate VER tyre wear degradation
+let pct = 64;
+setInterval(() => {
+  const bar = document.getElementById('ver-bar');
+  const lbl = document.getElementById('ver-pct');
+  if (bar && lbl && pct > 20) {
+    pct = Math.max(20, pct - (Math.random() * 0.3));
+    bar.style.width = pct.toFixed(1) + '%';
+    lbl.textContent = pct.toFixed(0) + '%';
+  }
+}, 2000);
+</script>
+
+</body>
+</html>
