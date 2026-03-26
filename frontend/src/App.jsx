@@ -15,7 +15,7 @@ const TABS = [
 function Topbar({ activeTab, setActiveTab, raceInfo }) {
   if (!raceInfo) return null;
   return (
-    <header className="topbar !static !w-full !flex-shrink-0 z-40 border-b border-white/5">
+    <header className="topbar">
       <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
         <span className="topbar__logo">STRAT-OS</span>
         <nav className="topbar__nav">
@@ -46,7 +46,6 @@ function Topbar({ activeTab, setActiveTab, raceInfo }) {
   )
 }
 
-// Sidenav component is no longer used, but keeping it for context if not explicitly removed
 function Sidenav({ activeTab, setActiveTab }) {
   return (
     <nav className="sidenav">
@@ -113,17 +112,13 @@ export default function App() {
   }, []);
 
   return (
-    <div className="carbon flex h-screen w-screen overflow-hidden">
-      <div className="flex-none h-full z-50">
-        <TwoLevelSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      </div>
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-        <Topbar activeTab={activeTab} setActiveTab={setActiveTab} raceInfo={raceInfo} />
-        <main className="main !m-0 !w-full flex-1 overflow-y-auto min-h-0 relative">
-          {PAGE_MAP[activeTab]}
-        </main>
-        <Footer />
-      </div>
+    <div className="carbon">
+      <Topbar activeTab={activeTab} setActiveTab={setActiveTab} raceInfo={raceInfo} />
+      <Sidenav activeTab={activeTab} setActiveTab={setActiveTab} />
+      <main className="main">
+        {PAGE_MAP[activeTab]}
+      </main>
+      <Footer />
     </div>
   )
 }
