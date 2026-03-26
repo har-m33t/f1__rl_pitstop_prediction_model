@@ -1,0 +1,353 @@
+/* ── Reset & base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #111111;
+  --s0:       #0e0e0e;
+  --s1:       #1a1a1a;
+  --s2:       #222222;
+  --s3:       #2a2a2a;
+  --red:      #e8002d;
+  --red-dim:  rgba(232,0,45,0.18);
+  --green:    #00e639;
+  --blue:     #79d1fc;
+  --muted:    #c6c6c7;
+  --dim:      #555555;
+  --font-headline: 'Space Grotesk', sans-serif;
+  --font-body:     'Inter', sans-serif;
+  --font-mono:     'JetBrains Mono', monospace;
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg);
+  color: #e5e2e1;
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+/* ── Carbon texture ───────────────────────────────────────────────────────── */
+.carbon {
+  background-image: radial-gradient(#1c1b1b 1px, transparent 0);
+  background-size: 4px 4px;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--red); }
+
+/* ── Material symbols ─────────────────────────────────────────────────────── */
+.ms {
+  font-family: 'Material Symbols Outlined';
+  font-size: 20px; line-height: 1;
+  font-variation-settings: 'FILL' 0, 'wght' 400;
+  user-select: none;
+}
+
+/* ── Topbar ───────────────────────────────────────────────────────────────── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; height: 48px; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  background: var(--s0);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.topbar__logo {
+  font-family: var(--font-headline);
+  font-weight: 900; font-style: italic;
+  font-size: 22px; letter-spacing: -0.04em;
+  color: var(--red);
+}
+.topbar__nav { display: flex; gap: 2px; }
+.topbar__nav a {
+  font-family: var(--font-mono);
+  font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;
+  padding: 4px 12px; color: var(--muted); text-decoration: none;
+  transition: color 0.15s, background 0.15s;
+}
+.topbar__nav a.active   { color: white; border-bottom: 2px solid var(--red); }
+.topbar__nav a:hover:not(.active) { color: white; background: var(--s3); }
+.topbar__right { display: flex; align-items: center; gap: 16px; }
+.topbar__status {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 10px; color: var(--muted);
+}
+.dot-live {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ── Sidenav ──────────────────────────────────────────────────────────────── */
+.sidenav {
+  position: fixed; left: 0; top: 48px; bottom: 32px; width: 56px; z-index: 90;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 12px 0; gap: 4px;
+  background: var(--s0);
+  border-right: 1px solid rgba(255,255,255,0.05);
+}
+.sidenav__btn {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border: none; background: transparent; cursor: pointer;
+  color: var(--dim); border-radius: 0;
+  transition: color 0.15s, background 0.15s;
+  position: relative;
+}
+.sidenav__btn:hover { color: white; background: var(--s2); }
+.sidenav__btn.active { background: var(--red); color: white; }
+.sidenav__tip {
+  position: absolute; left: 48px;
+  background: var(--s3); border: 1px solid var(--s2);
+  font-family: var(--font-mono); font-size: 9px;
+  padding: 3px 8px; white-space: nowrap;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.15s;
+}
+.sidenav__btn:hover .sidenav__tip { opacity: 1; }
+.sidenav__spacer { flex: 1; }
+
+/* ── Main canvas ──────────────────────────────────────────────────────────── */
+.main {
+  margin-left: 56px; margin-top: 48px; margin-bottom: 32px;
+  padding: 16px; display: flex; flex-direction: column; gap: 16px;
+  min-height: calc(100vh - 80px);
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.footer {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 32px; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px;
+  background: var(--s0);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-family: var(--font-mono); font-size: 9px;
+}
+.footer__left { display: flex; gap: 24px; }
+.footer__right { display: flex; gap: 24px; color: var(--dim); }
+
+/* ── Cards / panels ───────────────────────────────────────────────────────── */
+.card {
+  background: var(--s1); padding: 16px;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.card--red-left  { border-left: 2px solid var(--red); }
+.card--s3-left   { border-left: 2px solid var(--s3); }
+.panel-label {
+  font-family: var(--font-mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: 0.2em;
+  color: var(--dim); margin-bottom: 12px;
+}
+.panel-title {
+  font-family: var(--font-headline); font-weight: 700;
+  font-size: 13px; text-transform: uppercase;
+  letter-spacing: 0.02em; color: white; margin-bottom: 4px;
+}
+
+/* ── Driver card ──────────────────────────────────────────────────────────── */
+.driver-card {
+  position: relative; overflow: hidden; cursor: pointer;
+}
+.driver-card__accent {
+  position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+}
+.driver-card__pos {
+  font-family: var(--font-mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: 0.2em; color: var(--dim);
+}
+.driver-card__name {
+  font-family: var(--font-headline); font-weight: 900;
+  font-style: italic; font-size: 20px;
+  color: white; line-height: 1.1; margin-top: 2px;
+}
+.driver-card__compound {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px;
+  margin-top: 8px;
+}
+.compound-dot { width: 10px; height: 10px; border-radius: 50%; }
+.tyre-bar { height: 3px; background: var(--s3); margin-top: 10px; }
+.tyre-bar__fill { height: 100%; transition: width 1s ease; }
+.driver-card__gap {
+  font-family: var(--font-mono); font-size: 11px;
+  margin-top: 6px;
+}
+.driver-card__overlay {
+  position: absolute; inset: 0;
+  background: rgba(14,14,14,0.92);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.2s;
+}
+.driver-card:hover .driver-card__overlay { opacity: 1; }
+.dqn-badge {
+  font-family: var(--font-mono); font-size: 9px;
+  background: var(--red); color: white;
+  padding: 2px 8px; margin-bottom: 6px;
+}
+.dqn-rec {
+  font-family: var(--font-mono); font-weight: 700;
+  font-size: 16px; color: white;
+}
+.dqn-sub {
+  font-family: var(--font-mono); font-size: 9px;
+  color: var(--muted); margin-top: 4px;
+}
+
+/* ── KPI tile ─────────────────────────────────────────────────────────────── */
+.kpi { background: var(--s1); padding: 12px; }
+.kpi__label {
+  font-family: var(--font-mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: 0.18em; color: var(--dim);
+}
+.kpi__value {
+  font-family: var(--font-headline); font-weight: 900;
+  font-size: 20px; color: white; margin-top: 4px;
+}
+.kpi__sub {
+  font-family: var(--font-mono); font-size: 9px; margin-top: 2px;
+}
+
+/* ── Grids ────────────────────────────────────────────────────────────────── */
+.grid-4  { display: grid; grid-template-columns: repeat(4, 1fr);  gap: 12px; }
+.grid-2  { display: grid; grid-template-columns: repeat(2, 1fr);  gap: 12px; }
+.grid-12 { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+.col-5   { grid-column: span 5; }
+.col-7   { grid-column: span 7; }
+.col-8   { grid-column: span 8; }
+.col-4   { grid-column: span 4; }
+.col-6   { grid-column: span 6; }
+.col-12  { grid-column: span 12; }
+@media (max-width: 1024px) {
+  .col-5, .col-7, .col-8, .col-4, .col-6 { grid-column: span 12; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .grid-2, .grid-4 { grid-template-columns: 1fr; }
+}
+
+/* ── Bar ──────────────────────────────────────────────────────────────────── */
+.perf-bar { height: 6px; background: var(--s3); margin-top: 4px; }
+.perf-bar__fill { height: 100%; transition: width 0.8s ease; }
+
+/* ── Q-value panel ───────────────────────────────────────────────────────── */
+.qval-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 10px;
+}
+.qval-row__label {
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--muted); min-width: 160px;
+}
+.qval-row__bar { flex: 1; height: 4px; background: var(--s3); }
+.qval-row__bar__fill { height: 100%; transition: width 0.8s ease; }
+.qval-row__val {
+  font-family: var(--font-mono); font-size: 10px;
+  color: white; min-width: 40px; text-align: right;
+}
+
+/* ── Timeline ────────────────────────────────────────────────────────────── */
+.timeline { position: relative; padding: 28px 0; overflow-x: auto; }
+.timeline__line {
+  position: absolute; height: 2px; background: var(--s3);
+  top: 50%; left: 0; right: 0; transform: translateY(-50%);
+}
+.timeline__events {
+  position: relative; display: flex; justify-content: space-around;
+  min-width: 700px;
+}
+.t-event { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; position: relative; }
+.t-event__label { font-family: var(--font-mono); font-size: 9px; color: var(--dim); margin-bottom: 2px; }
+.t-event__dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--bg); }
+.t-event__tip {
+  position: absolute; top: 28px;
+  background: var(--s3); border: 1px solid rgba(255,255,255,0.08);
+  font-family: var(--font-mono); font-size: 9px;
+  padding: 4px 8px; white-space: nowrap;
+  opacity: 0; transition: opacity 0.15s; pointer-events: none;
+}
+.t-event:hover .t-event__tip { opacity: 1; }
+.t-event--live .t-event__dot {
+  width: 18px; height: 18px;
+  background: var(--red); border-radius: 0; transform: rotate(45deg);
+  box-shadow: 0 0 12px rgba(232,0,45,0.6);
+}
+
+/* ── Stint bar ────────────────────────────────────────────────────────────── */
+.stint-row { display: flex; align-items: center; height: 28px; background: var(--s0); margin-bottom: 4px; }
+.stint-row:hover { background: var(--s2); }
+.stint-row__driver {
+  width: 56px; font-family: var(--font-mono); font-size: 11px;
+  font-weight: 700; color: white; padding: 0 8px;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  flex-shrink: 0;
+}
+.stint-row__track { flex: 1; display: flex; height: 100%; position: relative; }
+.stint-seg { height: 100%; }
+.stint-pit {
+  position: absolute; top: 0; bottom: 0; width: 2px;
+  background: var(--red); box-shadow: 0 0 6px rgba(232,0,45,0.5);
+}
+.stint-pit--predicted {
+  background: transparent; border-left: 1px dashed rgba(255,255,255,0.5);
+  box-shadow: none;
+}
+
+/* ── Degradation curve ────────────────────────────────────────────────────── */
+.deg-card { background: var(--s1); padding: 16px; }
+.compound-label {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-weight: 700; font-size: 12px;
+  margin-bottom: 10px;
+}
+
+/* ── Scenario btn ─────────────────────────────────────────────────────────── */
+.scenario-btn {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 10px; background: var(--s0); border: none;
+  color: white; cursor: pointer; width: 100%; margin-bottom: 4px;
+  font-family: var(--font-mono); font-size: 11px;
+  transition: background 0.15s;
+}
+.scenario-btn:hover { background: var(--s2); }
+
+/* ── Execute btn ──────────────────────────────────────────────────────────── */
+.execute-btn {
+  width: 100%; padding: 10px;
+  background: var(--red); color: white; border: none; cursor: pointer;
+  font-family: var(--font-headline); font-weight: 900;
+  font-style: italic; font-size: 13px; text-transform: uppercase;
+  letter-spacing: 0.04em; margin-top: 12px;
+  transition: background 0.15s;
+}
+.execute-btn:hover { background: #c00025; }
+
+/* ── Animations ───────────────────────────────────────────────────────────── */
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+@keyframes blink  { 0%,100%{opacity:1} 50%{opacity:0} }
+.pulse { animation: pulse 2s ease-in-out infinite; }
+.blink { animation: blink 1s step-end infinite; }
+
+/* ── Telemetry dense row ──────────────────────────────────────────────────── */
+.telem-tile {
+  background: var(--s0);
+  border-left: 2px solid var(--s3);
+  padding: 10px 12px;
+}
+.telem-tile__label {
+  font-family: var(--font-mono); font-size: 9px;
+  text-transform: uppercase; letter-spacing: 0.18em; color: var(--dim);
+}
+.telem-tile__value {
+  font-family: var(--font-mono); font-size: 20px;
+  font-weight: 700; color: white; margin-top: 4px;
+}
+.telem-tile__sub { font-family: var(--font-mono); font-size: 9px; margin-top: 2px; }
+
+/* ── Counterfactual ──────────────────────────────────────────────────────── */
+.cf-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 10px; background: var(--s0); margin-bottom: 3px;
+  font-family: var(--font-mono); font-size: 10px; color: var(--muted);
+}
+.cf-row__val { color: white; font-weight: 700; }
