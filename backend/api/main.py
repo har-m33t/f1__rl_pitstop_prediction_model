@@ -86,7 +86,7 @@ def get_race_drivers():
         
         # Get history
         driver_history = race_df[(race_df['Driver'] == driver) & (race_df['LapNumber'] <= LIVE_LAP)]
-        lap_times = driver_history['LapTime'].dropna().apply(lambda x: pd.to_timedelta(x).total_seconds() if pd.notnull(x) and str(x) != 'nan' else 80).tolist()
+        lap_times = driver_history['LapTime'].dropna().apply(lambda x: float(str(x).strip()) if pd.notnull(x) and str(x) != 'nan' else 80.0).tolist()
         
         # RL Model placeholder logic (would invoke DQN here)
         tire_age = int(row['TireAge'])
@@ -136,8 +136,11 @@ def get_telemetry():
             if not d_row.empty:
                 val = str(d_row.iloc[0]['LapTime'])
                 if val != 'nan':
-                    secs = pd.to_timedelta(val).total_seconds()
-                    lap_data[driver] = round(secs, 3)
+                    try:
+                        secs = float(val)
+                        lap_data[driver] = round(secs, 3)
+                    except ValueError:
+                        pass
         chart_data.append(lap_data)
         
     return chart_data[-25:] # return last 25 laps
