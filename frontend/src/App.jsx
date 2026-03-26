@@ -23,15 +23,15 @@ function LoadingOverlay({ visible }) {
     }}>
       <div className="spinner" style={{ width: 40, height: 40, border: '3px solid var(--red)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
       <div style={{ marginTop: 16, fontFamily: 'var(--font-mono)', color: 'var(--dim)', fontSize: 12 }}>
-        SYNCING TELEMETRY FROM FASTAPI...
+        PULLING RACE TELEMETRY AND UPDATING UI...
       </div>
       <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }
 
-function Topbar({ activeTab, setActiveTab, raceInfo, races, selectedRace, onSelectRace }) {
-  if (!raceInfo) return null;
+function Topbar({ activeTab, setActiveTab, raceInfo, metadata, selectedRace, onSelectRace }) {
+  if (!raceInfo || !metadata) return null;
   return (
     <header className="topbar">
       <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
@@ -49,25 +49,35 @@ function Topbar({ activeTab, setActiveTab, raceInfo, races, selectedRace, onSele
           ))}
         </nav>
       </div>
-      <div className="topbar__right">
-        {races.length > 0 && selectedRace && (
-          <select 
-            value={`${selectedRace.year}|${selectedRace.track}`}
-            onChange={e => {
-              const [y, t] = e.target.value.split('|');
-              onSelectRace({ year: parseInt(y), track: t });
-            }}
-            style={{
-              background: 'var(--s1)', color: 'white', border: '1px solid rgba(255,255,255,0.1)',
-              padding: '4px 8px', fontFamily: 'var(--font-mono)', fontSize: 11, cursor: 'pointer'
-            }}
-          >
-            {races.map(r => (
-              <option key={`${r.year}|${r.track}`} value={`${r.year}|${r.track}`}>
-                {r.year} {r.track.toUpperCase()}
-              </option>
-            ))}
-          </select>
+      <div className="topbar__right" style={{ gap: 12 }}>
+        {metadata.tracks && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <select 
+              value={selectedRace?.track || ''}
+              onChange={e => onSelectRace({ track: e.target.value, year: selectedRace?.year || metadata.years[0] })}
+              style={{
+                background: 'var(--s1)', color: 'white', border: '1px solid rgba(255,255,255,0.1)',
+                padding: '4px 8px', fontFamily: 'var(--font-mono)', fontSize: 11, cursor: 'pointer'
+              }}
+            >
+              <option value="" disabled>Select Track</option>
+              {metadata.tracks.map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+            </select>
+            
+            {selectedRace?.track && (
+              <select 
+                value={selectedRace?.year || ''}
+                onChange={e => onSelectRace({ ...selectedRace, year: parseInt(e.target.value) })}
+                style={{
+                  background: 'var(--s1)', color: 'white', border: '1px solid rgba(255,255,255,0.1)',
+                  padding: '4px 8px', fontFamily: 'var(--font-mono)', fontSize: 11, cursor: 'pointer'
+                }}
+              >
+                <option value="" disabled>Select Year</option>
+                {metadata.years.map(y => <option key={y} value={y}>{y}</option>)}
+              </select>
+            )}
+          </div>
         )}
         <div className="topbar__status">
           <span className="dot-live" />
@@ -125,37 +135,41 @@ function Footer() {
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [raceInfo, setRaceInfo] = useState({ event: 'LOADING...', totalLaps: 0, currentLap: 0, weather: '', trackTemp: 0, scProbability: 0 })
-  const [races, setRaces] = useState([])
+  const [metadata, setMetadata] = useState({ tracks: [], years: [] })
   const [selectedRace, setSelectedRace] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
-  // Fetch Race List once
+  // Fetch Metadata once
   useEffect(() => {
-    fetch('http://localhost:8000/api/race/list')
+    fetch('http://localhost:8000/api/metadata')
       .then(r => r.json())
       .then(data => {
-        setRaces(data);
-        if (data.length > 0) setSelectedRace(data[0]);
+        setMetadata(data);
+        if (data.tracks.length > 0 && data.years.length > 0) {
+          // Setup a default initial race selection
+          setSelectedRace({ track: 'Monaco', year: 2024 });
+        }
       })
       .catch(console.error);
   }, []);
 
   // Fetch Race info and toggle loading when selectedRace changes
   useEffect(() => {
-    if (!selectedRace) return;
+    if (!selectedRace || !selectedRace.track || !selectedRace.year) return;
     
     setIsLoading(true);
     const fetchData = async () => {
       try {
         const res = await fetch(`http://localhost:8000/api/race/info?year=${selectedRace.year}&track=${selectedRace.track}`);
+        if (!res.ok) throw new Error('API Error');
         const data = await res.json();
         setRaceInfo(data);
         
-        // Artificial delay so the loading screen is visible (and gives child components time to fetch simultaneously)
-        setTimeout(() => setIsLoading(false), 800);
+        // Artificial delay so the loading screen feels substantial while backend processes
+        setTimeout(() => setIsLoading(false), 1500);
       } catch (e) {
         console.error("Failed to fetch race info", e);
-        setIsLoading(false);
+        setTimeout(() => setIsLoading(false), 1500);
       }
     };
     fetchData();
@@ -173,7 +187,7 @@ export default function App() {
 
   return (
     <div className="carbon">
-      <Topbar activeTab={activeTab} setActiveTab={setActiveTab} raceInfo={raceInfo} races={races} selectedRace={selectedRace} onSelectRace={setSelectedRace} />
+      <Topbar activeTab={activeTab} setActiveTab={setActiveTab} raceInfo={raceInfo} metadata={metadata} selectedRace={selectedRace} onSelectRace={setSelectedRace} />
       <Sidenav activeTab={activeTab} setActiveTab={setActiveTab} />
       <main className="main" style={{ position: 'relative' }}>
         <LoadingOverlay visible={isLoading} />
