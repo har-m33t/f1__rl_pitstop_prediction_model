@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { PerfBar } from '../components/Shared.jsx'
 
-function ObsPanel() {
+function ObsPanel({ selectedRace }) {
   const [obsData, setObsData] = useState([]);
   useEffect(() => {
     const fetchObs = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/model/observations');
+        if (!selectedRace) return;
+        const res = await fetch(`http://localhost:8000/api/model/observations?year=${selectedRace.year}&track=${selectedRace.track}`);
         setObsData(await res.json());
       } catch(e) { console.error(e) }
     };
@@ -51,14 +52,15 @@ function ObsPanel() {
   )
 }
 
-function PerformancePanel() {
+function PerformancePanel({ selectedRace }) {
   const [perfData, setPerfData] = useState([]);
   useEffect(() => {
-    fetch('http://localhost:8000/api/model/performance')
+    if (!selectedRace) return;
+    fetch(`http://localhost:8000/api/model/performance?year=${selectedRace.year}&track=${selectedRace.track}`)
       .then(r => r.json())
       .then(setPerfData)
       .catch(console.error);
-  }, []);
+  }, [selectedRace]);
 
   return (
     <div className="card">
@@ -102,11 +104,11 @@ function PerformancePanel() {
   )
 }
 
-export default function RlModel() {
+export default function RlModel({ selectedRace }) {
   return (
     <div className="grid-12">
-      <div className="col-6"><ObsPanel /></div>
-      <div className="col-6"><PerformancePanel /></div>
+      <div className="col-6"><ObsPanel selectedRace={selectedRace} /></div>
+      <div className="col-6"><PerformancePanel selectedRace={selectedRace} /></div>
     </div>
   )
 }

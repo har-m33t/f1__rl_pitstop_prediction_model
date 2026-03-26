@@ -27,13 +27,14 @@ const CustomTooltip = ({ active, payload, label }) => {
   )
 }
 
-export default function LapDeltaChart() {
+export default function LapDeltaChart({ selectedRace }) {
   const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/race/telemetry');
+        if (!selectedRace) return;
+        const res = await fetch(`http://localhost:8000/api/race/telemetry?year=${selectedRace.year}&track=${selectedRace.track}`);
         setChartData(await res.json());
       } catch (e) {
         console.error(e);
@@ -42,7 +43,7 @@ export default function LapDeltaChart() {
     fetchData();
     const id = setInterval(fetchData, 3000);
     return () => clearInterval(id);
-  }, []);
+  }, [selectedRace]);
 
   return (
     <div className="card" style={{ padding: 16 }}>

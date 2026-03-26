@@ -52,13 +52,14 @@ function DriverCard({ driver }) {
   )
 }
 
-export default function DriverGrid() {
+export default function DriverGrid({ selectedRace }) {
   const [drivers, setDrivers] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/race/drivers');
+        if (!selectedRace) return;
+        const res = await fetch(`http://localhost:8000/api/race/drivers?year=${selectedRace.year}&track=${selectedRace.track}`);
         setDrivers(await res.json());
       } catch (e) {
         console.error(e);
@@ -67,7 +68,7 @@ export default function DriverGrid() {
     fetchData();
     const id = setInterval(fetchData, 3000);
     return () => clearInterval(id);
-  }, []);
+  }, [selectedRace]);
 
   return (
     <div className="grid-2">

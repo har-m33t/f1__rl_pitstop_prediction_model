@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Icon } from '../components/Shared.jsx'
 
-function StintTimeline() {
+function StintTimeline({ selectedRace }) {
   const [stints, setStints] = useState([]);
   
   useEffect(() => {
     const fetchStints = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/strategy/timeline');
+        if (!selectedRace) return;
+        const res = await fetch(`http://localhost:8000/api/strategy/timeline?year=${selectedRace.year}&track=${selectedRace.track}`);
         const data = await res.json();
         setStints(data.stints || []);
       } catch(e) {
@@ -17,7 +18,7 @@ function StintTimeline() {
     fetchStints();
     const id = setInterval(fetchStints, 3000);
     return () => clearInterval(id);
-  }, []);
+  }, [selectedRace]);
 
   return (
     <div className="card">
@@ -83,10 +84,10 @@ function StrategyPanel() {
   )
 }
 
-export default function Strategy() {
+export default function Strategy({ selectedRace }) {
   return (
     <div className="grid-12">
-      <div className="col-8"><StintTimeline /></div>
+      <div className="col-8"><StintTimeline selectedRace={selectedRace} /></div>
       <div className="col-4"><StrategyPanel /></div>
     </div>
   )

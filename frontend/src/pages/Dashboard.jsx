@@ -3,12 +3,13 @@ import DriverGrid         from '../components/DriverGrid.jsx'
 import LapDeltaChart      from '../components/LapDeltaChart.jsx'
 import { KpiTile, TelemTile } from '../components/Shared.jsx'
 
-function EventTimeline() {
+function EventTimeline({ selectedRace }) {
   const [events, setEvents] = useState([]);
   useEffect(() => {
     const fetchTimeline = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/strategy/timeline');
+        if (!selectedRace) return;
+        const res = await fetch(`http://localhost:8000/api/strategy/timeline?year=${selectedRace.year}&track=${selectedRace.track}`);
         const data = await res.json();
         setEvents(data.events || []);
       } catch (e) {
@@ -18,7 +19,7 @@ function EventTimeline() {
     fetchTimeline();
     const id = setInterval(fetchTimeline, 3000);
     return () => clearInterval(id);
-  }, []);
+  }, [selectedRace]);
 
   return (
     <div className="card">
@@ -52,13 +53,14 @@ function EventTimeline() {
   )
 }
 
-export default function Dashboard() {
+export default function Dashboard({ selectedRace }) {
   const [raceInfo, setRaceInfo] = useState({ scProbability: 0, trackTemp: 0 });
 
   useEffect(() => {
     const fetchInfo = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/race/info');
+        if (!selectedRace) return;
+        const res = await fetch(`http://localhost:8000/api/race/info?year=${selectedRace.year}&track=${selectedRace.track}`);
         setRaceInfo(await res.json());
       } catch (e) {
         console.error(e);
@@ -67,7 +69,7 @@ export default function Dashboard() {
     fetchInfo();
     const id = setInterval(fetchInfo, 3000);
     return () => clearInterval(id);
-  }, []);
+  }, [selectedRace]);
 
   return (
     <>
@@ -81,12 +83,12 @@ export default function Dashboard() {
 
       {/* Driver cards + chart */}
       <div className="grid-12">
-        <div className="col-5"><DriverGrid /></div>
-        <div className="col-7"><LapDeltaChart /></div>
+        <div className="col-5"><DriverGrid selectedRace={selectedRace} /></div>
+        <div className="col-7"><LapDeltaChart selectedRace={selectedRace} /></div>
       </div>
 
       {/* Event timeline */}
-      <EventTimeline />
+      <EventTimeline selectedRace={selectedRace} />
 
       {/* Dense telemetry row */}
       <div className="grid-4">
