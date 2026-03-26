@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>F1 MISSION CONTROL | STRAT-OS v4.0.2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&amp;family=JetBrains+Mono:wght@400;700&amp;family=Space+Grotesk:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed": "#e2e2e2",
+                        "tertiary-fixed": "#c0e8ff",
+                        "on-tertiary-fixed": "#001e2b",
+                        "surface-container-low": "#1c1b1b",
+                        "surface": "#131313",
+                        "background": "#131313",
+                        "error-container": "#93000a",
+                        "surface-container-high": "#2a2a2a",
+                        "inverse-primary": "#bf0023",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "surface-variant": "#353534",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#007da4",
+                        "surface-container-highest": "#353534",
+                        "surface-container": "#201f1f",
+                        "inverse-surface": "#e5e2e1",
+                        "outline": "#af8785",
+                        "primary-fixed": "#ffdad7",
+                        "on-error-container": "#ffdad6",
+                        "secondary": "#c6c6c7",
+                        "on-secondary": "#2f3131",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "on-tertiary-container": "#f8fcff",
+                        "on-background": "#e5e2e1",
+                        "surface-dim": "#131313",
+                        "on-primary-fixed": "#410006",
+                        "on-secondary-fixed-variant": "#454747",
+                        "tertiary": "#79d1fc",
+                        "surface-bright": "#3a3939",
+                        "tertiary-fixed-dim": "#79d1fc",
+                        "primary-container": "#e8002d",
+                        "primary-fixed-dim": "#ffb3af",
+                        "on-primary-fixed-variant": "#930018",
+                        "on-secondary-container": "#b4b5b5",
+                        "primary": "#ffb3af",
+                        "on-error": "#690005",
+                        "outline-variant": "#5e3f3d",
+                        "on-tertiary-fixed-variant": "#004d66",
+                        "surface-tint": "#ffb3af",
+                        "secondary-container": "#454747",
+                        "on-primary-container": "#fffaf9",
+                        "on-surface": "#e5e2e1",
+                        "on-tertiary": "#003547",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-surface-variant": "#e8bcb9",
+                        "on-primary": "#68000e"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #111111;
+            color: #e5e2e1;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        .carbon-texture {
+            background-image: radial-gradient(#1c1b1b 1px, transparent 0);
+            background-size: 4px 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #131313; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e8002d; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+<!-- TopAppBar -->
+<header class="bg-[#131313] dark:bg-[#131313] flex justify-between items-center w-full px-6 py-3 z-50 fixed top-0 left-0">
+<div class="flex items-center gap-8">
+<span class="font-['Space_Grotesk'] font-bold text-xl text-[#E8002D]">F1 MISSION CONTROL</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-[#C6C6C7] font-['JetBrains_Mono'] px-2 font-['Inter'] uppercase tracking-widest text-[0.6875rem] hover:bg-[#2A2A2A] transition-colors duration-100" href="#">2024 SEASON</a>
+<a class="text-white font-['JetBrains_Mono'] border-l-2 border-[#E8002D] px-2 font-['Inter'] uppercase tracking-widest text-[0.6875rem] hover:bg-[#2A2A2A] transition-colors duration-100" href="#">MONACO GP</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#C6C6C7] hover:bg-[#2A2A2A] p-2 transition-colors">settings</button>
+<button class="material-symbols-outlined text-[#C6C6C7] hover:bg-[#2A2A2A] p-2 transition-colors">account_circle</button>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col z-40 bg-[#1C1B1B] dark:bg-[#1C1B1B] w-64 pt-16 border-r-0">
+<div class="px-6 py-4 mb-4">
+<div class="text-[#E8002D] font-black italic font-['Inter'] text-[0.6875rem] font-bold tracking-tighter">STRAT-OS</div>
+<div class="text-[#C6C6C7] text-[0.6rem] font-['JetBrains_Mono'] opacity-60">v4.0.2-LIVE</div>
+</div>
+<nav class="flex-grow">
+<a class="text-[#C6C6C7] flex items-center px-4 py-3 opacity-60 hover:bg-[#2A2A2A] hover:opacity-100 transition-all font-['Inter'] text-[0.6875rem] font-bold tracking-tighter" href="#">
+<span class="material-symbols-outlined mr-3">insights</span> TELEMETRY
+            </a>
+<a class="bg-[#2A2A2A] text-white border-l-4 border-[#E8002D] flex items-center px-4 py-3 translate-x-1 font-['Inter'] text-[0.6875rem] font-bold tracking-tighter" href="#">
+<span class="material-symbols-outlined mr-3">route</span> STRATEGY
+            </a>
+<a class="text-[#C6C6C7] flex items-center px-4 py-3 opacity-60 hover:bg-[#2A2A2A] hover:opacity-100 transition-all font-['Inter'] text-[0.6875rem] font-bold tracking-tighter" href="#">
+<span class="material-symbols-outlined mr-3">tire_repair</span> TYRES
+            </a>
+<a class="text-[#C6C6C7] flex items-center px-4 py-3 opacity-60 hover:bg-[#2A2A2A] hover:opacity-100 transition-all font-['Inter'] text-[0.6875rem] font-bold tracking-tighter" href="#">
+<span class="material-symbols-outlined mr-3">cloudy_snowing</span> WEATHER
+            </a>
+<a class="text-[#C6C6C7] flex items-center px-4 py-3 opacity-60 hover:bg-[#2A2A2A] hover:opacity-100 transition-all font-['Inter'] text-[0.6875rem] font-bold tracking-tighter" href="#">
+<span class="material-symbols-outlined mr-3">hub</span> COMMMS
+            </a>
+</nav>
+<div class="mt-auto pb-12">
+<a class="text-[#C6C6C7] flex items-center px-4 py-3 opacity-60 hover:bg-[#2A2A2A] hover:opacity-100 transition-all font-['Inter'] text-[0.6875rem] font-bold tracking-tighter" href="#">
+<span class="material-symbols-outlined mr-3">logout</span> LOGOUT
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 mt-12 mb-8 p-6 grid grid-cols-12 gap-6 carbon-texture">
+<!-- Row 1: 3D Surface & Timeline -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-low p-1 border-none relative overflow-hidden">
+<div class="flex justify-between items-center px-4 py-2 bg-surface-container-high">
+<span class="font-bold text-[0.6875rem] tracking-widest text-secondary uppercase">Lap Degradation Surface (3D)</span>
+<span class="font-mono text-[0.6rem] text-primary-container">LIVE DATA STREAM :: AGGREGATED</span>
+</div>
+<div class="h-[400px] w-full flex items-center justify-center bg-surface relative">
+<div class="absolute inset-0 opacity-20 pointer-events-none">
+<div class="w-full h-full border-[0.5px] border-outline-variant/30 grid grid-cols-10 grid-rows-10">
+<!-- Simulated 3D Mesh Net -->
+<div class="col-span-10 row-span-10 flex items-center justify-center">
+<svg class="w-full h-full" viewbox="0 0 800 400">
+<path d="M 100 300 Q 400 50 700 300" fill="none" stroke="#E8002D" stroke-width="2"></path>
+<path d="M 100 320 Q 400 70 700 320" fill="none" opacity="0.4" stroke="#E8002D" stroke-width="1"></path>
+<path d="M 100 280 Q 400 30 700 280" fill="none" opacity="0.6" stroke="#E8002D" stroke-width="1"></path>
+<!-- Surface Lines -->
+<line opacity="0.3" stroke="#FFFFFF" stroke-width="0.5" x1="200" x2="250" y1="300" y2="150"></line>
+<line opacity="0.3" stroke="#FFFFFF" stroke-width="0.5" x1="300" x2="350" y1="300" y2="120"></line>
+<line opacity="0.3" stroke="#FFFFFF" stroke-width="0.5" x1="400" x2="450" y1="300" y2="100"></line>
+<line opacity="0.3" stroke="#FFFFFF" stroke-width="0.5" x1="500" x2="550" y1="300" y2="140"></line>
+</svg>
+</div>
+</div>
+</div>
+<!-- Mock Tooltip -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-surface-container-highest/90 p-3 border-l-4 border-primary-container z-10 backdrop-blur-md">
+<div class="font-mono text-[0.65rem] text-secondary">VAL_X: LAP 42</div>
+<div class="font-mono text-[0.65rem] text-secondary">VAL_Y: T_AGE 18</div>
+<div class="font-mono text-xs font-bold text-white">DELTA: +1.242s</div>
+</div>
+<div class="absolute bottom-4 right-4 flex gap-2">
+<button class="bg-surface-container-highest p-2 text-white text-[0.6rem] font-mono hover:bg-primary-container">ROT_X</button>
+<button class="bg-surface-container-highest p-2 text-white text-[0.6rem] font-mono hover:bg-primary-container">ROT_Y</button>
+<button class="bg-surface-container-highest p-2 text-white text-[0.6rem] font-mono hover:bg-primary-container">ISO</button>
+</div>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-4 bg-surface-container-low p-1 border-none">
+<div class="flex justify-between items-center px-4 py-2 bg-surface-container-high">
+<span class="font-bold text-[0.6875rem] tracking-widest text-secondary uppercase">Strategy Comparison</span>
+<span class="material-symbols-outlined text-xs">monitoring</span>
+</div>
+<div class="p-4 h-[400px] flex flex-col justify-between">
+<!-- Side by side duel charts simulation -->
+<div class="flex-grow space-y-4">
+<div class="h-1/2 relative border-b border-outline-variant/20">
+<div class="absolute top-0 left-0 text-[0.5rem] font-mono opacity-50">LAP TIME (s)</div>
+<svg class="w-full h-full" viewbox="0 0 200 100">
+<path d="M0,80 L20,78 L40,82 L60,85 L80,30 L100,35 L120,38 L140,40 L160,85 L180,88 L200,90" fill="none" stroke="#E8002D" stroke-width="1.5"></path>
+<path d="M0,82 L20,80 L40,84 L60,87 L80,30 L100,32 L120,34 L140,36 L160,38 L180,40 L200,42" fill="none" stroke="#FFFFFF" stroke-dasharray="2,2" stroke-width="1"></path>
+<!-- Pit Lines -->
+<line stroke="#E8002D" stroke-width="1" x1="80" x2="80" y1="0" y2="100"></line>
+<line stroke="#FFFFFF" stroke-dasharray="2,2" stroke-width="1" x1="160" x2="160" y1="0" y2="100"></line>
+</svg>
+</div>
+<div class="h-1/3 relative bg-surface-container-lowest">
+<div class="absolute top-0 left-0 text-[0.5rem] font-mono opacity-50">RL DELTA GAP</div>
+<svg class="w-full h-full preserve-3d" viewbox="0 0 200 50">
+<path d="M0,25 L40,20 L80,25 L120,35 L160,25 L200,15" fill="none" stroke="#FFFFFF" stroke-width="0.5"></path>
+<!-- Delta regions -->
+<rect fill="#00FF00" height="10" opacity="0.2" width="40" x="160" y="15"></rect>
+<rect fill="#E8002D" height="10" opacity="0.2" width="40" x="80" y="25"></rect>
+</svg>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-2">
+<div class="bg-surface-container p-2">
+<div class="text-[0.5rem] font-mono text-secondary uppercase">Actual Strat</div>
+<div class="text-xs font-mono font-bold text-white">2-STOP (S-M-H)</div>
+</div>
+<div class="bg-surface-container p-2 border-l-2 border-primary-container">
+<div class="text-[0.5rem] font-mono text-secondary uppercase">RL Optimizer</div>
+<div class="text-xs font-mono font-bold text-white">1-STOP (S-H)</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Row 2: Pit Decision Timeline -->
+<div class="col-span-12 bg-surface-container-low p-1 border-none">
+<div class="flex justify-between items-center px-4 py-2 bg-surface-container-high">
+<span class="font-bold text-[0.6875rem] tracking-widest text-secondary uppercase">Pit Decision Timeline :: Full Field</span>
+<div class="flex gap-4 font-mono text-[0.6rem]">
+<span class="flex items-center gap-1"><span class="w-2 h-2 bg-red-600"></span> SOFT</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 bg-yellow-500"></span> MED</span>
+<span class="flex items-center gap-1"><span class="w-2 h-2 bg-white"></span> HARD</span>
+</div>
+</div>
+<div class="p-4 overflow-x-auto custom-scrollbar">
+<div class="min-w-[1200px] space-y-2">
+<!-- Timeline Rows -->
+<div class="group cursor-pointer">
+<div class="flex items-center h-8 bg-surface-container-lowest">
+<div class="w-20 font-mono text-xs font-bold text-white px-2 border-r border-outline-variant/20">VER</div>
+<div class="flex-grow flex h-full relative">
+<!-- Compounds -->
+<div class="h-full bg-red-600/30" style="width: 25%"></div>
+<div class="h-full bg-yellow-500/30" style="width: 45%"></div>
+<div class="h-full bg-white/20" style="width: 30%"></div>
+<!-- Events -->
+<div class="absolute top-0 bottom-0 left-[25%] w-0.5 bg-primary-container shadow-[0_0_8px_#E8002D] z-10"></div>
+<div class="absolute top-0 bottom-0 left-[70%] w-0.5 bg-primary-container shadow-[0_0_8px_#E8002D] z-10"></div>
+<div class="absolute top-0 bottom-0 left-[62%] w-0.5 border-l border-dashed border-white opacity-60"></div>
+</div>
+</div>
+<div class="hidden group-hover:block bg-surface-container-high p-4 border-l-4 border-primary-container">
+<div class="flex justify-between mb-2">
+<span class="text-[0.6rem] font-mono text-secondary">DETAILED LAP ANALYSIS: MAX VERSTAPPEN</span>
+<span class="text-[0.6rem] font-mono text-primary-container">RL RECOM: PIT LAP 48 (Dashed)</span>
+</div>
+<div class="h-16 w-full">
+<svg class="w-full h-full" viewbox="0 0 1000 50">
+<polyline fill="none" points="0,40 100,38 200,42 250,10 300,45 500,48 700,10 800,42 1000,45" stroke="#E8002D" stroke-width="1"></polyline>
+</svg>
+</div>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="flex items-center h-8 bg-surface-container-lowest">
+<div class="w-20 font-mono text-xs font-bold text-white px-2 border-r border-outline-variant/20">HAM</div>
+<div class="flex-grow flex h-full relative">
+<div class="h-full bg-yellow-500/30" style="width: 40%"></div>
+<div class="h-full bg-white/20" style="width: 60%"></div>
+<div class="absolute top-0 bottom-0 left-[40%] w-0.5 bg-primary-container z-10"></div>
+<div class="absolute top-0 bottom-0 left-[42%] w-0.5 border-l border-dashed border-white opacity-60"></div>
+</div>
+</div>
+</div>
+<div class="group cursor-pointer">
+<div class="flex items-center h-8 bg-surface-container-lowest">
+<div class="w-20 font-mono text-xs font-bold text-white px-2 border-r border-outline-variant/20">LEC</div>
+<div class="flex-grow flex h-full relative">
+<div class="h-full bg-red-600/30" style="width: 30%"></div>
+<div class="h-full bg-yellow-500/30" style="width: 40%"></div>
+<div class="h-full bg-white/20" style="width: 30%"></div>
+<div class="absolute top-0 bottom-0 left-[30%] w-0.5 bg-primary-container z-10"></div>
+<div class="absolute top-0 bottom-0 left-[70%] w-0.5 bg-primary-container z-10"></div>
+<div class="absolute top-0 bottom-0 left-[68%] w-0.5 border-l border-dashed border-white opacity-60"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Row 3: Driver Grid -->
+<div class="col-span-12">
+<div class="flex justify-between items-center mb-4">
+<span class="font-bold text-[0.6875rem] tracking-widest text-secondary uppercase">Telemetry Monitor :: Grid Status</span>
+<div class="bg-surface-container px-3 py-1 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="text-[0.6rem] font-mono text-white">SERVER STATUS: NOMINAL</span>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+<!-- Driver Card 1 -->
+<div class="bg-surface-container-high p-4 border-l-2 border-primary-container hover:shadow-[0_0_15px_rgba(232,0,45,0.3)] transition-all relative group cursor-pointer">
+<div class="absolute top-0 left-0 w-full h-1 bg-[#3671C6]"></div> <!-- Red Bull Team Color -->
+<div class="flex justify-between items-start mb-2">
+<div class="font-mono text-3xl font-black text-white italic">VER</div>
+<div class="text-right">
+<div class="text-[0.6rem] font-mono text-secondary">POS</div>
+<div class="text-lg font-mono font-bold text-primary-container">01</div>
+</div>
+</div>
+<div class="flex justify-between items-center py-2 border-y border-outline-variant/10">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-yellow-500" style="font-variation-settings: 'FILL' 1;">tire_repair</span>
+<span class="font-mono text-xs text-white">M <span class="text-secondary opacity-50">14L</span></span>
+</div>
+<div class="font-mono text-xs text-white">1:14.422</div>
+</div>
+<div class="mt-3 h-10 w-full">
+<svg class="w-full h-full" viewbox="0 0 100 30">
+<polyline fill="none" opacity="0.8" points="0,15 10,12 20,18 30,10 40,25 50,5 60,15 70,12 80,18 90,14 100,10" stroke="#FFFFFF" stroke-width="1.5"></polyline>
+</svg>
+</div>
+<div class="hidden group-hover:flex absolute inset-0 bg-surface/90 flex-col items-center justify-center p-4">
+<span class="bg-primary-container text-white font-mono text-[0.6rem] px-2 py-1 mb-2">DQN RECOMMENDATION</span>
+<span class="text-white font-mono text-lg font-bold">BOX LAP 48</span>
+<span class="text-secondary font-mono text-[0.6rem] mt-2">EST. DELTA: -2.4s</span>
+</div>
+</div>
+<!-- Driver Card 2 -->
+<div class="bg-surface-container-high p-4 border-l-2 border-primary-container hover:shadow-[0_0_15px_rgba(232,0,45,0.3)] transition-all relative group cursor-pointer">
+<div class="absolute top-0 left-0 w-full h-1 bg-[#F58020]"></div> <!-- McLaren Team Color -->
+<div class="flex justify-between items-start mb-2">
+<div class="font-mono text-3xl font-black text-white italic">NOR</div>
+<div class="text-right">
+<div class="text-[0.6rem] font-mono text-secondary">POS</div>
+<div class="text-lg font-mono font-bold text-white">02</div>
+</div>
+</div>
+<div class="flex justify-between items-center py-2 border-y border-outline-variant/10">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-red-600" style="font-variation-settings: 'FILL' 1;">tire_repair</span>
+<span class="font-mono text-xs text-white">S <span class="text-secondary opacity-50">08L</span></span>
+</div>
+<div class="font-mono text-xs text-white">1:14.581</div>
+</div>
+<div class="mt-3 h-10 w-full">
+<svg class="w-full h-full" viewbox="0 0 100 30">
+<polyline fill="none" opacity="0.8" points="0,20 10,18 20,22 30,15 40,28 50,10 60,18 70,15 80,22 90,18 100,14" stroke="#FFFFFF" stroke-width="1.5"></polyline>
+</svg>
+</div>
+</div>
+<!-- Driver Card 3 -->
+<div class="bg-surface-container-high p-4 border-l-2 border-primary-container hover:shadow-[0_0_15px_rgba(232,0,45,0.3)] transition-all relative group cursor-pointer">
+<div class="absolute top-0 left-0 w-full h-1 bg-[#27F4D2]"></div> <!-- Mercedes Team Color -->
+<div class="flex justify-between items-start mb-2">
+<div class="font-mono text-3xl font-black text-white italic">HAM</div>
+<div class="text-right">
+<div class="text-[0.6rem] font-mono text-secondary">POS</div>
+<div class="text-lg font-mono font-bold text-white">03</div>
+</div>
+</div>
+<div class="flex justify-between items-center py-2 border-y border-outline-variant/10">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-secondary" style="font-variation-settings: 'FILL' 1;">tire_repair</span>
+<span class="font-mono text-xs text-white">H <span class="text-secondary opacity-50">21L</span></span>
+</div>
+<div class="font-mono text-xs text-white">1:15.102</div>
+</div>
+<div class="mt-3 h-10 w-full">
+<svg class="w-full h-full" viewbox="0 0 100 30">
+<polyline fill="none" opacity="0.8" points="0,25 20,28 40,26 60,27 80,29 100,30" stroke="#FFFFFF" stroke-width="1.5"></polyline>
+</svg>
+</div>
+</div>
+<!-- Driver Card 4 -->
+<div class="bg-surface-container-high p-4 border-l-2 border-primary-container hover:shadow-[0_0_15px_rgba(232,0,45,0.3)] transition-all relative group cursor-pointer">
+<div class="absolute top-0 left-0 w-full h-1 bg-[#F91536]"></div> <!-- Ferrari Team Color -->
+<div class="flex justify-between items-start mb-2">
+<div class="font-mono text-3xl font-black text-white italic">LEC</div>
+<div class="text-right">
+<div class="text-[0.6rem] font-mono text-secondary">POS</div>
+<div class="text-lg font-mono font-bold text-white">04</div>
+</div>
+</div>
+<div class="flex justify-between items-center py-2 border-y border-outline-variant/10">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-yellow-500" style="font-variation-settings: 'FILL' 1;">tire_repair</span>
+<span class="font-mono text-xs text-white">M <span class="text-secondary opacity-50">12L</span></span>
+</div>
+<div class="font-mono text-xs text-white">1:14.992</div>
+</div>
+<div class="mt-3 h-10 w-full">
+<svg class="w-full h-full" viewbox="0 0 100 30">
+<polyline fill="none" opacity="0.8" points="0,15 20,14 40,16 60,15 80,17 100,16" stroke="#FFFFFF" stroke-width="1.5"></polyline>
+</svg>
+</div>
+</div>
+<!-- Driver Card 5 -->
+<div class="bg-surface-container-high p-4 border-l-2 border-primary-container hover:shadow-[0_0_15px_rgba(232,0,45,0.3)] transition-all relative group cursor-pointer">
+<div class="absolute top-0 left-0 w-full h-1 bg-[#3671C6]"></div>
+<div class="flex justify-between items-start mb-2">
+<div class="font-mono text-3xl font-black text-white italic">PER</div>
+<div class="text-right">
+<div class="text-[0.6rem] font-mono text-secondary">POS</div>
+<div class="text-lg font-mono font-bold text-white">05</div>
+</div>
+</div>
+<div class="flex justify-between items-center py-2 border-y border-outline-variant/10">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-yellow-500" style="font-variation-settings: 'FILL' 1;">tire_repair</span>
+<span class="font-mono text-xs text-white">M <span class="text-secondary opacity-50">16L</span></span>
+</div>
+<div class="font-mono text-xs text-white">1:15.221</div>
+</div>
+<div class="mt-3 h-10 w-full">
+<svg class="w-full h-full" viewbox="0 0 100 30">
+<polyline fill="none" opacity="0.8" points="0,18 10,20 20,18 30,22 40,25 50,30 60,28 70,26 80,24 90,22 100,21" stroke="#FFFFFF" stroke-width="1.5"></polyline>
+</svg>
+</div>
+</div>
+<!-- More cards repeated to fill grid... Simplified for space -->
+<div class="bg-surface-container-high p-4 border-l-2 border-primary-container opacity-40 hover:opacity-100 transition-all border-none">
+<div class="flex items-center justify-center h-full text-secondary font-mono text-[0.6rem]">
+                        + 15 FIELD ENTRIES
+                    </div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="bg-[#131313] flex justify-between items-center px-4 py-1 h-8 z-50 fixed bottom-0 w-full border-t border-[#C6C6C7]/15">
+<div class="flex gap-4">
+<span class="font-['JetBrains_Mono'] text-[0.6rem] uppercase text-[#E8002D] font-bold">LIVE STATUS: NOMINAL</span>
+<span class="font-['JetBrains_Mono'] text-[0.6rem] uppercase text-[#C6C6C7]">TELEMETRY_STATUS: CONNECTED</span>
+</div>
+<div class="flex gap-4">
+<span class="font-['JetBrains_Mono'] text-[0.6rem] uppercase text-[#C6C6C7] hover:text-white cursor-pointer">ENCRYPTION_ACTIVE</span>
+<span class="font-['JetBrains_Mono'] text-[0.6rem] uppercase text-white">LATENCY: 14MS | SESSION: LIVE</span>
+</div>
+</footer>
+</body></html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Precision Velocity | Race Strategy Command</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        .font-mono { font-family: 'JetBrains+Mono', monospace; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .apex-gradient {
+            background: linear-gradient(90deg, #e10600 0%, #ffb4a8 100%);
+        }
+        .carbon-texture {
+            background-color: #121314;
+            background-image: linear-gradient(45deg, #1b1c1d 25%, transparent 25%), 
+                              linear-gradient(-45deg, #1b1c1d 25%, transparent 25%), 
+                              linear-gradient(45deg, transparent 75%, #1b1c1d 75%), 
+                              linear-gradient(-45deg, transparent 75%, #1b1c1d 75%);
+            background-size: 4px 4px;
+        }
+        .clipped-corner {
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-container": "#00821c",
+                        "background": "#121314",
+                        "on-secondary": "#2f3131",
+                        "secondary-fixed": "#e2e2e2",
+                        "on-tertiary-fixed": "#002203",
+                        "on-primary": "#680200",
+                        "surface-container": "#1f2021",
+                        "on-primary-container": "#fff2f0",
+                        "primary-container": "#e10600",
+                        "surface-bright": "#39393a",
+                        "on-tertiary-container": "#d9ffce",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "inverse-primary": "#c00500",
+                        "inverse-surface": "#e3e2e3",
+                        "inverse-on-surface": "#303031",
+                        "surface": "#121314",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#ffb4a8",
+                        "on-surface-variant": "#e9bcb5",
+                        "on-primary-fixed-variant": "#930300",
+                        "tertiary": "#00e639",
+                        "on-secondary-container": "#b4b5b5",
+                        "on-surface": "#e3e2e3",
+                        "surface-container-lowest": "#0d0e0f",
+                        "outline": "#af8781",
+                        "primary-fixed": "#ffdad4",
+                        "on-secondary-fixed-variant": "#454747",
+                        "surface-variant": "#343536",
+                        "surface-dim": "#121314",
+                        "tertiary-fixed": "#72ff70",
+                        "surface-tint": "#ffb4a8",
+                        "surface-container-high": "#292a2b",
+                        "surface-container-low": "#1b1c1d",
+                        "on-error": "#690005",
+                        "secondary-container": "#454747",
+                        "secondary": "#c6c6c7",
+                        "error-container": "#93000a",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed": "#410100",
+                        "on-tertiary": "#003907",
+                        "on-tertiary-fixed-variant": "#00530e",
+                        "surface-container-highest": "#343536",
+                        "tertiary-fixed-dim": "#00e639",
+                        "primary": "#ffb4a8",
+                        "outline-variant": "#5e3f3a",
+                        "on-background": "#e3e2e3"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0px", "lg": "0px", "xl": "0px", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background carbon-texture selection:bg-primary-container selection:text-white">
+<!-- SideNavBar (Authority: JSON) -->
+<nav class="fixed left-0 top-0 h-full z-50 flex flex-col py-6 bg-neutral-950 h-screen w-20 flex flex-col items-center border-r-0">
+<div class="mb-8 flex flex-col items-center">
+<span class="text-red-600 font-black italic text-xl tracking-tighter font-headline">STRAT-01</span>
+<span class="font-['Space_Grotesk'] tracking-tight uppercase text-[8px] font-bold text-neutral-500 mt-1">PIT WALL</span>
+</div>
+<div class="flex flex-col gap-4 flex-1">
+<!-- Dashboard Tab (Active) -->
+<button class="w-12 h-12 flex items-center justify-center bg-red-600 text-white transition-transform scale-95 active:scale-90 group relative">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="absolute left-16 bg-neutral-900 text-[10px] px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity font-headline pointer-events-none">DASHBOARD</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center text-neutral-500 hover:text-neutral-200 transition-colors hover:bg-neutral-800 transition-transform scale-95 active:scale-90 group relative">
+<span class="material-symbols-outlined">timer</span>
+<span class="absolute left-16 bg-neutral-900 text-[10px] px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity font-headline pointer-events-none">LIVE TIMING</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center text-neutral-500 hover:text-neutral-200 transition-colors hover:bg-neutral-800 transition-transform scale-95 active:scale-90 group relative">
+<span class="material-symbols-outlined">insights</span>
+<span class="absolute left-16 bg-neutral-900 text-[10px] px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity font-headline pointer-events-none">STRATEGY</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center text-neutral-500 hover:text-neutral-200 transition-colors hover:bg-neutral-800 transition-transform scale-95 active:scale-90 group relative">
+<span class="material-symbols-outlined">history</span>
+<span class="absolute left-16 bg-neutral-900 text-[10px] px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity font-headline pointer-events-none">HISTORY</span>
+</button>
+</div>
+<div class="mt-auto flex flex-col gap-4 items-center">
+<button class="w-12 h-12 flex items-center justify-center text-neutral-500 hover:text-neutral-200 transition-colors hover:bg-neutral-800">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-10 h-10 bg-surface-container-highest border border-outline-variant flex items-center justify-center overflow-hidden">
+<img alt="Team Principal Profile" data-alt="close up profile shot of a professional motor racing team principal wearing headset in a dark garage environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpv79oajsZWHquxA6OV9wHx77_szqPoz1jyfeE9aJ062kHq02tf65s7pxyBedTLXjJeaNKHh2to7xYEedB0bM-9SYZ_BlwjF3Np9XIL4qthmntV65eVZmxPcUkMjrS3y3OvjWpj1XKSNdb0LuuGwPjgrWEwsdHECoR-KqT_HmQlfz1C75ELEH4IKYhhSjvKRd8SE6RXx2GJs1dnxQwRH5Cp0UtQ9cRwDnPkvEGP1H5b9YJ-In4w8jhEnkRp-hm-8V_-N4prjKDjg"/>
+</div>
+</div>
+</nav>
+<!-- TopAppBar (Authority: JSON) -->
+<header class="fixed top-0 right-0 left-20 z-40 flex justify-between items-center px-8 bg-neutral-950/80 backdrop-blur-xl docked full-width top-0 h-16 border-b border-neutral-800/50">
+<div class="flex items-center gap-6">
+<span class="text-red-600 font-black italic text-2xl font-headline tracking-tighter">PRECISION VELOCITY</span>
+<div class="h-6 w-[1px] bg-neutral-800"></div>
+<div class="flex gap-8">
+<span class="text-red-500 border-b-2 border-red-600 font-['Space_Grotesk'] font-medium text-sm tracking-widest uppercase cursor-pointer">MONACO GP</span>
+<span class="text-neutral-400 font-['Space_Grotesk'] font-medium text-sm tracking-widest uppercase flex items-center gap-2">
+<span class="w-2 h-2 bg-red-600 animate-pulse"></span>
+                    RACE START: 00:42:15
+                </span>
+<span class="text-neutral-400 font-['Space_Grotesk'] font-medium text-sm tracking-widest uppercase">SUNNY 24°C</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-neutral-400 hover:text-red-400 transition-all cursor-pointer">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-neutral-400 hover:text-red-400 transition-all cursor-pointer">
+<span class="material-symbols-outlined">settings_input_component</span>
+</button>
+<button class="text-neutral-400 hover:text-red-400 transition-all cursor-pointer">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-20 mt-16 p-6 grid grid-cols-12 gap-4">
+<!-- ROW 1: Telemetry Summary & Driver Cards -->
+<div class="col-span-12 lg:col-span-8 grid grid-cols-2 gap-4">
+<!-- Driver Card 1: Leader -->
+<div class="bg-surface-container-low p-4 flex flex-col gap-3 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary-container"></div>
+<div class="flex justify-between items-start">
+<div>
+<span class="text-[10px] font-headline font-bold text-neutral-500 tracking-[0.2em] uppercase">P1 / LAP 42</span>
+<h2 class="text-2xl font-black italic font-headline text-on-surface leading-tight tracking-tight">VERSTAPPEN</h2>
+</div>
+<div class="bg-surface-container-highest px-3 py-1 flex items-center gap-2">
+<span class="w-3 h-3 bg-red-600 rounded-full"></span>
+<span class="font-mono text-sm font-bold">SOFT</span>
+</div>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="flex flex-col">
+<span class="text-[10px] font-headline font-bold text-neutral-500 uppercase">Gap to P2</span>
+<span class="font-mono text-xl text-tertiary">+12.482s</span>
+</div>
+<div class="w-32 h-16 opacity-50 grayscale hover:grayscale-0 transition-all">
+<img alt="Team Logo" class="object-contain w-full h-full" data-alt="professional formula one team logo design minimalist high contrast white on dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNpp6CuvyQyIM_MZWem0RC0-D81EeY6IhXw_V7PhZgEZ5SXTfURZWBQIeRwTl0XoCOKS3aFOilLo7W9b8H8GZowTmErrL9-xnWIOG-vOISTSKX0R3WReaCbOnGGo6c6yoUsrLf9jsahqUwu3T-I20ym73zgMGb-6gK4B4nSk9h5uWduVBdSJWrVmDuGhyxOr5b8gAbauQgrV1yiXgRFujhB3-cUQw_YQAj56T8biMJpZ98ROpx-nYDLF-NxsUA50c9oUQYGIt4og"/>
+</div>
+</div>
+<!-- Tire Wear Custom Gauge -->
+<div class="mt-4">
+<div class="flex justify-between text-[10px] font-headline font-bold text-neutral-500 uppercase mb-1">
+<span>Tire Integrity</span>
+<span>64%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest">
+<div class="h-full bg-primary-container shadow-[0_0_10px_#e10600]" style="width: 64%"></div>
+</div>
+</div>
+</div>
+<!-- Driver Card 2: Rival -->
+<div class="bg-surface-container-low p-4 flex flex-col gap-3 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-tertiary"></div>
+<div class="flex justify-between items-start">
+<div>
+<span class="text-[10px] font-headline font-bold text-neutral-500 tracking-[0.2em] uppercase">P2 / LAP 42</span>
+<h2 class="text-2xl font-black italic font-headline text-on-surface leading-tight tracking-tight">LECLERC</h2>
+</div>
+<div class="bg-surface-container-highest px-3 py-1 flex items-center gap-2">
+<span class="w-3 h-3 bg-yellow-500 rounded-full"></span>
+<span class="font-mono text-sm font-bold">MED</span>
+</div>
+</div>
+<div class="flex justify-between items-end mt-2">
+<div class="flex flex-col">
+<span class="text-[10px] font-headline font-bold text-neutral-500 uppercase">Interval</span>
+<span class="font-mono text-xl text-primary-container">-0.842s</span>
+</div>
+<div class="w-32 h-16 opacity-50 grayscale hover:grayscale-0 transition-all">
+<img alt="Team Logo" class="object-contain w-full h-full" data-alt="iconic racing team logo sharp geometric emblem in high contrast display" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA40LjebEU_L-nZyifQVtWS6xRpgne-3Mf2wYPYdwLpOePj6-sJdIEAvxTSPAy7palrASrs637lztn_bulGW4Pg4PhdXmqIDlqBTlKIGAqrS5VlYxnfZ8wH-X-l-9IvXPvHRJLzUCfP6tXBIQUIH4bpt3OaNAdXZbYdYeVAV_jrnMtN7cuRv6DPm5b4Cuki0wsXw-GNa7y37VMGDSXO_wP_cWCswWMcTDxFhqoOqyU6AYl0BdwZ0rvNR5vSkA6uGPD50e0BZaCqJQ"/>
+</div>
+</div>
+<!-- Tire Wear Custom Gauge -->
+<div class="mt-4">
+<div class="flex justify-between text-[10px] font-headline font-bold text-neutral-500 uppercase mb-1">
+<span>Tire Integrity</span>
+<span>42%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest">
+<div class="h-full bg-tertiary shadow-[0_0_10px_#00e639]" style="width: 42%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Technical Widgets (G-Force & Track Temp) -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-4">
+<div class="bg-surface-container-low p-4 grid grid-cols-2 gap-4 h-full">
+<div class="flex flex-col items-center justify-center border border-outline-variant/20 relative">
+<span class="absolute top-2 left-2 text-[9px] font-headline font-bold text-neutral-500">G-FORCE</span>
+<div class="w-24 h-24 border-2 border-dashed border-neutral-700 rounded-full flex items-center justify-center relative">
+<div class="absolute w-2 h-2 bg-red-600 shadow-[0_0_8px_#e10600]" style="transform: translate(15px, -20px)"></div>
+<span class="font-mono text-xl font-bold">3.4G</span>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center border border-outline-variant/20 relative">
+<span class="absolute top-2 left-2 text-[9px] font-headline font-bold text-neutral-500">TRACK TEMP</span>
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-red-500 text-3xl">thermostat</span>
+<span class="font-mono text-2xl font-bold mt-1">48.2°C</span>
+<span class="text-[9px] font-headline text-tertiary">STABLE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- ROW 2: Multi-line Lap Trend Chart -->
+<div class="col-span-12 lg:col-span-9 bg-surface-container p-6 relative">
+<div class="flex justify-between items-center mb-6">
+<div class="flex flex-col">
+<h3 class="font-headline font-black text-lg italic tracking-tight uppercase">Lap Time Delta Trends</h3>
+<span class="text-[10px] text-neutral-500 font-headline uppercase tracking-widest">REAL-TIME TELEMETRY STREAM</span>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-1 bg-red-600"></div>
+<span class="text-[10px] font-headline font-bold text-neutral-400">VER</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-1 bg-tertiary"></div>
+<span class="text-[10px] font-headline font-bold text-neutral-400">LEC</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-1 bg-blue-500"></div>
+<span class="text-[10px] font-headline font-bold text-neutral-400">HAM</span>
+</div>
+</div>
+</div>
+<div class="h-64 relative w-full border-l border-b border-neutral-800 flex items-end px-2">
+<!-- Abstract Chart Representation using CSS -->
+<svg class="w-full h-full absolute inset-0 px-2 overflow-visible" viewbox="0 0 1000 200">
+<!-- VER Line -->
+<path d="M0,150 Q100,140 200,160 T400,130 T600,145 T800,120 T1000,135" fill="none" stroke="#e10600" stroke-width="2"></path>
+<!-- LEC Line -->
+<path d="M0,170 Q100,155 200,175 T400,160 T600,180 T800,150 T1000,165" fill="none" stroke="#00e639" stroke-width="2"></path>
+<!-- HAM Line -->
+<path d="M0,140 Q100,165 200,150 T400,170 T600,140 T800,165 T1000,155" fill="none" stroke="#3b82f6" stroke-width="2"></path>
+</svg>
+<!-- Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none opacity-10">
+<div class="w-full h-[1px] bg-white"></div>
+<div class="w-full h-[1px] bg-white"></div>
+<div class="w-full h-[1px] bg-white"></div>
+<div class="w-full h-[1px] bg-white"></div>
+</div>
+</div>
+<div class="flex justify-between mt-2 text-[9px] font-mono text-neutral-500">
+<span>LAP 20</span>
+<span>LAP 25</span>
+<span>LAP 30</span>
+<span>LAP 35</span>
+<span>LAP 40</span>
+<span>LAP 45</span>
+</div>
+</div>
+<!-- Strategy Box / Pit Window -->
+<div class="col-span-12 lg:col-span-3 bg-surface-container-high p-4 flex flex-col border-l-2 border-primary-container">
+<h3 class="font-headline font-bold text-sm tracking-widest uppercase mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-xs">settings_suggest</span>
+                PIT STRATEGY
+            </h3>
+<div class="space-y-4">
+<div class="bg-surface-container-lowest p-3 border border-outline-variant/10">
+<div class="flex justify-between items-center mb-1">
+<span class="text-[10px] font-headline font-black text-neutral-500">OPTIMAL WINDOW</span>
+<span class="text-[10px] font-headline font-bold text-tertiary">OPEN</span>
+</div>
+<div class="font-mono text-lg font-bold">LAP 45 - 50</div>
+</div>
+<div class="space-y-2">
+<span class="text-[10px] font-headline font-bold text-neutral-500 uppercase tracking-widest">Forecasted Scenarios</span>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center p-2 bg-neutral-900/50 hover:bg-neutral-800 transition-colors cursor-pointer group">
+<span class="text-xs font-headline font-medium">Scenario A: Aggressive</span>
+<span class="material-symbols-outlined text-xs group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<div class="flex justify-between items-center p-2 bg-neutral-900/50 hover:bg-neutral-800 transition-colors cursor-pointer group">
+<span class="text-xs font-headline font-medium">Scenario B: Defensive</span>
+<span class="material-symbols-outlined text-xs group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+<div class="flex justify-between items-center p-2 bg-neutral-900/50 hover:bg-neutral-800 transition-colors cursor-pointer group">
+<span class="text-xs font-headline font-medium">Scenario C: Fuel Save</span>
+<span class="material-symbols-outlined text-xs group-hover:translate-x-1 transition-transform">chevron_right</span>
+</div>
+</div>
+</div>
+<button class="mt-4 w-full bg-primary-container text-on-primary-container font-headline font-black italic uppercase py-3 text-sm tracking-tighter hover:bg-red-700 transition-colors clipped-corner">
+                    EXECUTE BOX THIS LAP
+                </button>
+</div>
+</div>
+<!-- ROW 3: Race Timeline & Event Feed -->
+<div class="col-span-12 bg-surface-container-low p-4">
+<div class="flex items-center gap-4 mb-4">
+<h3 class="font-headline font-bold text-xs tracking-[0.3em] uppercase text-neutral-500">Event Timeline</h3>
+<div class="flex-1 h-[1px] bg-neutral-800"></div>
+</div>
+<div class="relative w-full overflow-x-auto">
+<div class="min-w-[1000px] flex items-center relative py-8">
+<!-- Timeline Base Line -->
+<div class="absolute h-1 w-full bg-surface-container-highest top-1/2 -translate-y-1/2"></div>
+<!-- Events -->
+<div class="relative flex-1 flex justify-around">
+<!-- SC Event -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-4 h-4 rounded-full bg-yellow-500 animate-pulse border-4 border-background"></div>
+<div class="absolute top-10 text-center opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-neutral-900 p-2 border border-yellow-500/50">
+<span class="text-[10px] font-headline font-bold text-yellow-500">SAFETY CAR (L12-L15)</span>
+</div>
+</div>
+<!-- Pit Event -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-4 h-4 rounded-full bg-primary-container border-4 border-background"></div>
+<div class="absolute top-10 text-center opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-neutral-900 p-2 border border-red-500/50">
+<span class="text-[10px] font-headline font-bold text-red-500">VER PIT (2.4s)</span>
+</div>
+</div>
+<!-- VSC Event -->
+<div class="flex flex-col items-center gap-2 group cursor-pointer">
+<div class="w-4 h-4 rounded-full bg-yellow-400/50 border-4 border-background"></div>
+</div>
+<!-- Active Point -->
+<div class="flex flex-col items-center gap-2 relative">
+<div class="w-6 h-6 bg-red-600 shadow-[0_0_15px_#e10600] flex items-center justify-center transform rotate-45">
+<span class="material-symbols-outlined text-white text-xs -rotate-45">navigation</span>
+</div>
+<span class="absolute -top-6 font-headline font-bold text-[10px] text-red-600 tracking-widest">LIVE</span>
+</div>
+<!-- Future Windows -->
+<div class="h-4 w-32 bg-primary-container/20 border border-dashed border-primary-container/40 absolute right-40 top-1/2 -translate-y-1/2 flex items-center justify-center">
+<span class="text-[8px] font-headline font-bold text-red-400">PIT WINDOW 2</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ROW 4: Live Telemetry Grid (Dense Data) -->
+<div class="col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-surface-container-lowest border-l-2 border-neutral-700 p-3">
+<span class="text-[9px] font-headline font-bold text-neutral-500 uppercase tracking-widest">FUEL ON BOARD</span>
+<div class="flex justify-between items-end mt-1">
+<span class="font-mono text-2xl font-bold">42.8 KG</span>
+<span class="text-xs text-tertiary mb-1">-0.2 TARGET</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest border-l-2 border-neutral-700 p-3">
+<span class="text-[9px] font-headline font-bold text-neutral-500 uppercase tracking-widest">ERS DEPLOYMENT</span>
+<div class="flex justify-between items-end mt-1">
+<span class="font-mono text-2xl font-bold">84%</span>
+<div class="flex gap-1 mb-2">
+<div class="w-1 h-3 bg-tertiary"></div>
+<div class="w-1 h-3 bg-tertiary"></div>
+<div class="w-1 h-3 bg-tertiary"></div>
+<div class="w-1 h-3 bg-neutral-700"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border-l-2 border-neutral-700 p-3">
+<span class="text-[9px] font-headline font-bold text-neutral-500 uppercase tracking-widest">BRAKE TEMP (FR)</span>
+<div class="flex justify-between items-end mt-1">
+<span class="font-mono text-2xl font-bold">642°C</span>
+<span class="text-[9px] font-headline text-red-500 mb-1">STRESSED</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest border-l-2 border-neutral-700 p-3">
+<span class="text-[9px] font-headline font-bold text-neutral-500 uppercase tracking-widest">LAST SECTOR</span>
+<div class="flex justify-between items-end mt-1">
+<span class="font-mono text-2xl font-bold">24.182</span>
+<span class="text-xs text-tertiary mb-1">PB</span>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Only on Dashboard) -->
+<button class="fixed bottom-8 right-8 bg-primary-container text-on-primary-container w-14 h-14 flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined text-3xl">radio</span>
+</button>
+</body></html>
