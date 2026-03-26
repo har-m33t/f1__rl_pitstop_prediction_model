@@ -1,16 +1,29 @@
-import { MODEL_OBSERVATIONS, AGENT_PERFORMANCE } from '../data/mockData.js'
+import { useState, useEffect } from 'react'
 import { PerfBar } from '../components/Shared.jsx'
 
 function ObsPanel() {
-  const qStay = -91.4, qPit = -89.1
-  const pitFavoured = qPit > qStay
+  const [obsData, setObsData] = useState([]);
+  useEffect(() => {
+    const fetchObs = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/model/observations');
+        setObsData(await res.json());
+      } catch(e) { console.error(e) }
+    };
+    fetchObs();
+    const id = setInterval(fetchObs, 3000);
+    return () => clearInterval(id);
+  }, []);
+
+  const qStay = -91.4, qPit = -89.1;
+  const pitFavoured = qPit > qStay;
 
   return (
     <div className="card">
       <div className="panel-title">DQN Agent — State Observation</div>
       <div className="panel-label">Current observation vector (normalised [0,1])</div>
 
-      {MODEL_OBSERVATIONS.map((obs, i) => (
+      {obsData.map((obs, i) => (
         <div key={i} className="qval-row">
           <div className="qval-row__label">{obs.label}</div>
           <div className="qval-row__bar">
@@ -39,12 +52,20 @@ function ObsPanel() {
 }
 
 function PerformancePanel() {
+  const [perfData, setPerfData] = useState([]);
+  useEffect(() => {
+    fetch('http://localhost:8000/api/model/performance')
+      .then(r => r.json())
+      .then(setPerfData)
+      .catch(console.error);
+  }, []);
+
   return (
     <div className="card">
       <div className="panel-title">Agent vs Baseline Performance</div>
       <div className="panel-label">Win-rate over 50 episodes vs identical race conditions</div>
 
-      {AGENT_PERFORMANCE.map(a => (
+      {perfData.map(a => (
         <PerfBar key={a.name} name={a.name} value={a.winRate} color={a.color} />
       ))}
 

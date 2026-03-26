@@ -1,9 +1,25 @@
-import { RACE_INFO, TIMELINE_EVENTS } from '../data/mockData.js'
+import { useState, useEffect } from 'react'
 import DriverGrid         from '../components/DriverGrid.jsx'
 import LapDeltaChart      from '../components/LapDeltaChart.jsx'
 import { KpiTile, TelemTile } from '../components/Shared.jsx'
 
 function EventTimeline() {
+  const [events, setEvents] = useState([]);
+  useEffect(() => {
+    const fetchTimeline = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/strategy/timeline');
+        const data = await res.json();
+        setEvents(data.events || []);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchTimeline();
+    const id = setInterval(fetchTimeline, 3000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="card">
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
@@ -16,7 +32,7 @@ function EventTimeline() {
       <div className="timeline">
         <div className="timeline__line" />
         <div className="timeline__events">
-          {TIMELINE_EVENTS.map(ev => (
+          {events.map(ev => (
             <div key={ev.id} className={`t-event${ev.live ? ' t-event--live' : ''}`}>
               <div className="t-event__label" style={{ color: ev.color === 'transparent' ? 'var(--red)' : ev.color }}>
                 {ev.label}
@@ -37,13 +53,29 @@ function EventTimeline() {
 }
 
 export default function Dashboard() {
+  const [raceInfo, setRaceInfo] = useState({ scProbability: 0, trackTemp: 0 });
+
+  useEffect(() => {
+    const fetchInfo = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/race/info');
+        setRaceInfo(await res.json());
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchInfo();
+    const id = setInterval(fetchInfo, 3000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <>
       {/* KPI Row */}
       <div className="grid-4">
         <KpiTile label="Optimal Pit Window" value="LAP 45–50" sub="▲ OPEN" subColor="var(--green)" />
-        <KpiTile label="Track Temp" value={`${RACE_INFO.trackTemp}°C`} sub="STABLE" subColor="var(--muted)" accent="var(--s3)" />
-        <KpiTile label="SC Probability" value={`${(RACE_INFO.scProbability * 100).toFixed(0)}%`} sub="LOW RISK" subColor="var(--muted)" accent="var(--s3)" />
+        <KpiTile label="Track Temp" value={`${raceInfo.trackTemp}°C`} sub="STABLE" subColor="var(--muted)" accent="var(--s3)" />
+        <KpiTile label="SC Probability" value={`${(raceInfo.scProbability * 100).toFixed(0)}%`} sub="LOW RISK" subColor="var(--muted)" accent="var(--s3)" />
         <KpiTile label="DQN Confidence" value="84.3%" sub="PIT RECOMMENDED" subColor="var(--green)" />
       </div>
 

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { RACE_INFO } from './data/mockData.js'
 import { Icon } from './components/Shared.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Strategy  from './pages/Strategy.jsx'
@@ -13,9 +12,10 @@ const TABS = [
   { id: 'model',     icon: 'model_training',  label: 'RL MODEL'  },
 ]
 
-function Topbar({ activeTab, setActiveTab, currentLap }) {
+function Topbar({ activeTab, setActiveTab, raceInfo }) {
+  if (!raceInfo) return null;
   return (
-    <header className="topbar">
+    <header className="topbar !static !w-full !flex-shrink-0 z-40 border-b border-white/5">
       <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
         <span className="topbar__logo">STRAT-OS</span>
         <nav className="topbar__nav">
@@ -34,10 +34,10 @@ function Topbar({ activeTab, setActiveTab, currentLap }) {
       <div className="topbar__right">
         <div className="topbar__status">
           <span className="dot-live" />
-          {RACE_INFO.event} · LAP {currentLap}/{RACE_INFO.totalLaps}
+          {raceInfo.event} · LAP {raceInfo.currentLap}/{raceInfo.totalLaps}
         </div>
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--dim)' }}>
-          {RACE_INFO.weather}
+          {raceInfo.weather}
         </div>
         <Icon name="notifications" style={{ color: 'var(--dim)', cursor: 'pointer', fontSize: 20 }} />
         <Icon name="account_circle" style={{ color: 'var(--dim)', cursor: 'pointer', fontSize: 20 }} />
@@ -46,6 +46,7 @@ function Topbar({ activeTab, setActiveTab, currentLap }) {
   )
 }
 
+// Sidenav component is no longer used, but keeping it for context if not explicitly removed
 function Sidenav({ activeTab, setActiveTab }) {
   return (
     <nav className="sidenav">
@@ -94,24 +95,35 @@ const PAGE_MAP = {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
-  const [currentLap, setCurrentLap] = useState(RACE_INFO.currentLap)
+  const [raceInfo, setRaceInfo] = useState({ event: 'LOADING...', totalLaps: 0, currentLap: 0, weather: '', trackTemp: 0, scProbability: 0 })
 
-  // Simulate live lap counter
   useEffect(() => {
-    const id = setInterval(() => {
-      setCurrentLap(l => l < RACE_INFO.totalLaps ? l + 1 : l)
-    }, 30000) // advance every 30s
-    return () => clearInterval(id)
-  }, [])
+    const fetchData = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/race/info');
+        const data = await res.json();
+        setRaceInfo(data);
+      } catch (e) {
+        console.error("Failed to fetch race info", e);
+      }
+    };
+    fetchData();
+    const id = setInterval(fetchData, 2000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
-    <div className="carbon">
-      <Topbar activeTab={activeTab} setActiveTab={setActiveTab} currentLap={currentLap} />
-      <Sidenav activeTab={activeTab} setActiveTab={setActiveTab} />
-      <main className="main">
-        {PAGE_MAP[activeTab]}
-      </main>
-      <Footer />
+    <div className="carbon flex h-screen w-screen overflow-hidden">
+      <div className="flex-none h-full z-50">
+        <TwoLevelSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      </div>
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+        <Topbar activeTab={activeTab} setActiveTab={setActiveTab} raceInfo={raceInfo} />
+        <main className="main !m-0 !w-full flex-1 overflow-y-auto min-h-0 relative">
+          {PAGE_MAP[activeTab]}
+        </main>
+        <Footer />
+      </div>
     </div>
   )
 }

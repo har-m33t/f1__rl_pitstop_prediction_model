@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { DRIVERS } from '../data/mockData.js'
 
 const COMPOUND_COLORS = { SOFT: '#e8002d', MEDIUM: '#eab308', HARD: '#ffffff', INTER: '#79d1fc' }
 
@@ -54,9 +53,25 @@ function DriverCard({ driver }) {
 }
 
 export default function DriverGrid() {
+  const [drivers, setDrivers] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/race/drivers');
+        setDrivers(await res.json());
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchData();
+    const id = setInterval(fetchData, 3000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="grid-2">
-      {DRIVERS.map(d => <DriverCard key={d.code} driver={d} />)}
+      {drivers.map(d => <DriverCard key={d.code} driver={d} />)}
     </div>
   )
 }

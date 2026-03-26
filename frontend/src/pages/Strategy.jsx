@@ -1,7 +1,24 @@
-import { STINTS } from '../data/mockData.js'
+import { useState, useEffect } from 'react'
 import { Icon } from '../components/Shared.jsx'
 
 function StintTimeline() {
+  const [stints, setStints] = useState([]);
+  
+  useEffect(() => {
+    const fetchStints = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/strategy/timeline');
+        const data = await res.json();
+        setStints(data.stints || []);
+      } catch(e) {
+        console.error(e);
+      }
+    };
+    fetchStints();
+    const id = setInterval(fetchStints, 3000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -14,7 +31,7 @@ function StintTimeline() {
         </div>
       </div>
       <div style={{ overflowX: 'auto' }}>
-        {STINTS.map(s => (
+        {stints.map(s => (
           <div key={s.driver} className="stint-row">
             <div className="stint-row__driver">{s.driver}</div>
             <div className="stint-row__track">

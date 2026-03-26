@@ -2,7 +2,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts'
-import { LAP_CHART_DATA } from '../data/mockData.js'
+import { useState, useEffect } from 'react'
 
 const DRIVERS = [
   { key: 'VER', color: '#e8002d' },
@@ -28,6 +28,22 @@ const CustomTooltip = ({ active, payload, label }) => {
 }
 
 export default function LapDeltaChart() {
+  const [chartData, setChartData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/race/telemetry');
+        setChartData(await res.json());
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchData();
+    const id = setInterval(fetchData, 3000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="card" style={{ padding: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -46,7 +62,7 @@ export default function LapDeltaChart() {
       </div>
 
       <ResponsiveContainer width="100%" height={200}>
-        <LineChart data={LAP_CHART_DATA} margin={{ top: 4, right: 8, bottom: 0, left: -20 }}>
+        <LineChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: -20 }}>
           <CartesianGrid stroke="rgba(255,255,255,0.05)" strokeDasharray="0" />
           <XAxis
             dataKey="lap" stroke="rgba(255,255,255,0.15)"
