@@ -55,6 +55,8 @@ function EventTimeline({ selectedRace }) {
 
 export default function Dashboard({ selectedRace }) {
   const [raceInfo, setRaceInfo] = useState({ scProbability: 0, trackTemp: 0 });
+  const [showDqnBreakdown, setShowDqnBreakdown] = useState(false);
+  const [dqnObs, setDqnObs] = useState([]);
 
   useEffect(() => {
     const fetchInfo = async () => {
@@ -62,6 +64,9 @@ export default function Dashboard({ selectedRace }) {
         if (!selectedRace) return;
         const res = await fetch(`http://localhost:8000/api/race/info?year=${selectedRace.year}&track=${selectedRace.track}`);
         setRaceInfo(await res.json());
+
+        const obsRes = await fetch(`http://localhost:8000/api/model/observations?year=${selectedRace.year}&track=${selectedRace.track}`);
+        setDqnObs(await obsRes.json());
       } catch (e) {
         console.error(e);
       }
@@ -71,14 +76,65 @@ export default function Dashboard({ selectedRace }) {
     return () => clearInterval(id);
   }, [selectedRace]);
 
+  const getFeature = (searchLabel) => {
+    const feature = dqnObs.find(o => o.label.includes(searchLabel));
+    return feature || { value: 0, color: 'var(--muted)' };
+  };
+
+  const tireAgeFeat = getFeature('tire_age');
+  const degFeat = getFeature('degradation');
+  const scFeat = getFeature('safety_car');
+
   return (
     <>
       {/* KPI Row */}
-      <div className="grid-4">
+      <div className="grid-4" style={{ position: 'relative' }}>
         <KpiTile label="Optimal Pit Window" value="LAP 45–50" sub="▲ OPEN" subColor="var(--green)" />
         <KpiTile label="Track Temp" value={`${raceInfo.trackTemp}°C`} sub="STABLE" subColor="var(--muted)" accent="var(--s3)" />
         <KpiTile label="SC Probability" value={`${(raceInfo.scProbability * 100).toFixed(0)}%`} sub="LOW RISK" subColor="var(--muted)" accent="var(--s3)" />
-        <KpiTile label="DQN Confidence" value="84.3%" sub="PIT RECOMMENDED" subColor="var(--green)" />
+        
+        <div style={{ position: 'relative' }}>
+          <KpiTile 
+            label="DQN Confidence" 
+            value="84.3%" 
+            sub="PIT RECOMMENDED" 
+            subColor="var(--green)" 
+            onClick={() => setShowDqnBreakdown(!showDqnBreakdown)}
+          />
+
+          {showDqnBreakdown && (
+            <div className="dqn-panel">
+              <div className="panel-title" style={{ marginBottom: 16 }}>Decision Breakdown</div>
+              <div className="panel-label">Features Driving Recommendation</div>
+              
+              <div className="qval-row">
+                <div className="qval-row__label">Tire Age Weight</div>
+                <div className="qval-row__bar">
+                  <div className="qval-row__bar__fill" style={{ width: `${tireAgeFeat.value * 100}%`, background: tireAgeFeat.color }} />
+                </div>
+                <div className="qval-row__val">{tireAgeFeat.value.toFixed(2)}</div>
+              </div>
+
+              <div className="qval-row">
+                <div className="qval-row__label">Degradation Slope</div>
+                <div className="qval-row__bar">
+                  <div className="qval-row__bar__fill" style={{ width: `${degFeat.value * 100}%`, background: degFeat.color }} />
+                </div>
+                <div className="qval-row__val" style={{ color: degFeat.highlight ? 'var(--red)' : 'white' }}>
+                  {degFeat.value.toFixed(2)}{degFeat.highlight ? ' ↑' : ''}
+                </div>
+              </div>
+
+              <div className="qval-row">
+                <div className="qval-row__label">SC Probability</div>
+                <div className="qval-row__bar">
+                  <div className="qval-row__bar__fill" style={{ width: `${scFeat.value * 100}%`, background: scFeat.color }} />
+                </div>
+                <div className="qval-row__val">{scFeat.value.toFixed(2)}</div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Driver cards + chart */}
