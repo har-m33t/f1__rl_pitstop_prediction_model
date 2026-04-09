@@ -8,9 +8,9 @@ export function Icon({ name, className = '', style = {} }) {
 }
 
 // KPI metric tile
-export function KpiTile({ label, value, sub, subColor = 'var(--muted)', accent = 'var(--red)' }) {
+export function KpiTile({ label, value, sub, subColor = 'var(--muted)', accent = 'var(--red)', onClick }) {
   return (
-    <div className="kpi" style={{ borderLeft: `2px solid ${accent}` }}>
+    <div className={`kpi ${onClick ? 'kpi--interactive' : ''}`} style={{ borderLeft: `2px solid ${accent}` }} onClick={onClick}>
       <div className="kpi__label">{label}</div>
       <div className="kpi__value">{value}</div>
       {sub && <div className="kpi__sub" style={{ color: subColor }}>{sub}</div>}
