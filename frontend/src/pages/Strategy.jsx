@@ -84,11 +84,85 @@ function StrategyPanel() {
   )
 }
 
+function PitWindowSimulator({ selectedRace }) {
+  const [pitWindow, setPitWindow] = useState(45);
+  const [projectedTime, setProjectedTime] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!selectedRace) return;
+    const fetchSim = async () => {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`http://localhost:8000/api/simulate_pit_window`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            year: selectedRace.year,
+            track: selectedRace.track,
+            start_lap: pitWindow,
+            end_lap: pitWindow + 4
+          })
+        });
+        const data = await res.json();
+        setProjectedTime(data.projected_time);
+      } catch (e) {
+        console.error(e);
+      }
+      setIsLoading(false);
+    };
+    
+    const timeoutId = setTimeout(fetchSim, 300);
+    return () => clearTimeout(timeoutId);
+  }, [pitWindow, selectedRace]);
+
+  const formatTime = (secs) => {
+    if (!secs) return '--:--.---';
+    const hrs = Math.floor(secs / 3600);
+    const m = Math.floor((secs % 3600) / 60);
+    const s = (secs % 60).toFixed(3);
+    return `${hrs > 0 ? hrs + ':' : ''}${m.toString().padStart(2, '0')}:${s.padStart(6, '0')}`;
+  };
+
+  return (
+    <div className="card" style={{ marginTop: 16 }}>
+      <div className="panel-title">Pit Window Simulator</div>
+      <div className="panel-label">Drag to adjust the target pit window and live-simulate race time via RL environment step() logic.</div>
+      
+      <div style={{ marginTop: 16, marginBottom: 8 }}>
+        <input 
+          type="range" 
+          min="10" 
+          max="70" 
+          value={pitWindow} 
+          onChange={(e) => setPitWindow(parseInt(e.target.value))}
+          style={{ width: '100%', accentColor: 'var(--red)' }}
+        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--dim)', marginTop: 4 }}>
+          <span>LAP 10</span>
+          <span style={{ color: 'white', fontWeight: 'bold' }}>Window: L{pitWindow} - L{pitWindow + 4}</span>
+          <span>LAP 70</span>
+        </div>
+      </div>
+
+      <div style={{ background: 'var(--s0)', padding: 12, borderLeft: '2px solid var(--red)', marginTop: 16 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--dim)', textTransform: 'uppercase' }}>Projected Finish Time</div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 24, color: isLoading ? 'var(--dim)' : 'white', marginTop: 4, transition: 'color 0.2s' }}>
+          {isLoading ? 'Simulating...' : formatTime(projectedTime)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Strategy({ selectedRace }) {
   return (
     <div className="grid-12">
       <div className="col-8"><StintTimeline selectedRace={selectedRace} /></div>
-      <div className="col-4"><StrategyPanel /></div>
+      <div className="col-4">
+        <StrategyPanel />
+        <PitWindowSimulator selectedRace={selectedRace} />
+      </div>
     </div>
   )
 }
