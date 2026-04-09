@@ -171,9 +171,16 @@ class F1PitEnv(gym.Env):
         if seed is not None:
             self._rng = np.random.default_rng(seed)
 
-        # Pick a random (race, driver) episode
+        # Pick a random (race, driver) episode by default
         keys = list(self._race_episodes.keys())
         key = keys[self._rng.integers(len(keys))]
+        
+        # Override with requested key if provided
+        if options and "episode_key" in options:
+            req_key = options["episode_key"]
+            if req_key in self._race_episodes:
+                key = req_key
+
         self._laps = self._race_episodes[key].reset_index(drop=True)
         self._episode_key = key
 
