@@ -351,3 +351,24 @@ html, body, #root {
   font-family: var(--font-mono); font-size: 10px; color: var(--muted);
 }
 .cf-row__val { color: white; font-weight: 700; }
+
+/* ── Panel / Popover ──────────────────────────────────────────────────────── */
+.dqn-panel {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  width: 300px; z-index: 50;
+  background: var(--s1); border: 1px solid var(--s3);
+  padding: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+}
+.dqn-panel::before {
+  content: ''; position: absolute; top: -6px; right: 24px;
+  width: 10px; height: 10px; background: var(--s1);
+  border-top: 1px solid var(--s3); border-left: 1px solid var(--s3);
+  transform: rotate(45deg);
+}
+
+.kpi--interactive {
+  cursor: pointer; transition: background 0.15s;
+}
+.kpi--interactive:hover {
+  background: var(--s2);
+}
